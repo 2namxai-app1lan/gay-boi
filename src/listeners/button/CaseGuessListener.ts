@@ -1,35 +1,41 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import { ButtonInteraction } from 'discord.js';
+import { Interaction } from 'discord.js';
 
 @ApplyOptions<Listener.Options>({
 	event: 'interactionCreate'
 })
 export class CaseGuessListener extends Listener {
-	public override async run(interaction: ButtonInteraction) {
+	public override async run(interaction: Interaction): Promise<void> {
 		if (!interaction.isButton()) return;
 
-		if (interaction.customId === 'guess_canter') {
-			return interaction.reply({
-				content: '❌ Sai rồi! Canter không phải thủ phạm.',
+		const id = interaction.customId;
+
+		if (id === 'guess_canter') {
+			await interaction.reply({
+				content:
+					'❌ Incorrect!\n\nReason: Canter was seen washing hands during the incident.',
 				ephemeral: true
 			});
+			return;
 		}
 
-		if (interaction.customId === 'guess_halen') {
-			return interaction.reply({
-				content: '❌ Sai rồi! Halen vô tội.',
+		if (id === 'guess_halen') {
+			await interaction.reply({
+				content:
+					'❌ Incorrect!\n\nReason: Halen has a verified alibi.',
 				ephemeral: true
 			});
+			return;
 		}
 
-		if (interaction.customId === 'guess_lololele') {
-			return interaction.reply({
-				content: '✅ ĐÚNG! Lololele là thủ phạm!',
+		if (id === 'guess_lololele') {
+			await interaction.reply({
+				content:
+					'✅ Correct!\n\nReason: Security footage shows suspicious activity near the restroom.',
 				ephemeral: true
 			});
+			return;
 		}
-
-		return; // 👈 FIX lỗi 7030
 	}
 }

@@ -1,0 +1,23 @@
+{
+  "1409021957986324561": {
+    "role": "director",
+    "level": 999,
+    "exp": 999999,
+    "accuracy": 100,
+    "trust": "MAXIMUM",
+    "casesSolved": 999,
+    "casesPublished": 999,
+
+    "correct": 999,
+    "wrong": 0
+  },
+
+  "151234567890123456": {
+    "role": "detective",
+    "level": 12,
+    "exp": 520,
+    "accuracy": 87,
+    "trust": "High",
+    "casesSolved": 14
+  }
+}

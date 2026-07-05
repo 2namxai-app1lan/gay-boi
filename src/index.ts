@@ -1,23 +1,45 @@
-import { SapphireClient } from '@sapphire/framework';
+import './lib/setup';
+
+import { LogLevel, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits } from 'discord.js';
 
 const client = new SapphireClient({
 	defaultPrefix: '!',
+	caseInsensitiveCommands: true,
+
+	logger: {
+		level: LogLevel.Debug
+	},
+
 	intents: [
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.GuildMessageReactions,
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.DirectMessages
-	]
+	],
+
+	loadMessageCommandListeners: true
 });
 
-client.once('ready', () => {
-	console.log('🟢 CLIENT READY');
-	console.log(`BOT USER: ${client.user?.tag}`);
-	console.log(`BOT ID: ${client.user?.id}`);
-});
+async function main() {
+	try {
+		client.logger.info('Logging in');
 
-// ⚠️ quan trọng: token lấy từ Railway Variables
-client.login(process.env.TOKEN);
+		await client.login();
 
+		client.logger.info('Logged in');
+
+		console.log('====================');
+		console.log(`BOT USER: ${client.user?.tag}`);
+		console.log(`BOT ID: ${client.user?.id}`);
+		console.log('====================');
+	} catch (error) {
+		client.logger.fatal(error);
+
+		await client.destroy();
+
+		process.exit(1);
+	}
+}
+
+void main();

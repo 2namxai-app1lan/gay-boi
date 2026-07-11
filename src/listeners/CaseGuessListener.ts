@@ -9,12 +9,15 @@ export class CaseGuessListener extends Listener {
 	public override async run(interaction: Interaction): Promise<void> {
 		if (!interaction.isButton()) return;
 
+		console.log('BUTTON CLICKED:', interaction.customId);
+
+		if (interaction.replied || interaction.deferred) return;
+
 		const id = interaction.customId;
 
 		if (id === 'guess_canter') {
 			await interaction.reply({
-				content:
-					'❌ Incorrect!\n\nReason: Canter was seen washing hands during the incident.',
+				content: '❌ Incorrect!\nReason: Canter has a solid alibi.',
 				ephemeral: true
 			});
 			return;
@@ -22,8 +25,7 @@ export class CaseGuessListener extends Listener {
 
 		if (id === 'guess_halen') {
 			await interaction.reply({
-				content:
-					'❌ Incorrect!\n\nReason: Halen has a verified alibi.',
+				content: '❌ Incorrect!\nReason: Halen was not near the scene.',
 				ephemeral: true
 			});
 			return;
@@ -31,8 +33,7 @@ export class CaseGuessListener extends Listener {
 
 		if (id === 'guess_lololele') {
 			await interaction.reply({
-				content:
-					'✅ Correct!\n\nReason: Security footage shows suspicious activity near the restroom.',
+				content: '✅ Correct!\nReason: Evidence points to Lololele.',
 				ephemeral: true
 			});
 			return;

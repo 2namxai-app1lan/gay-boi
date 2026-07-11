@@ -46,7 +46,7 @@ export class GiveExpCommand extends Command {
 			process.cwd(),
 			'src',
 			'data',
-			'users.json'
+			'players.json'
 		);
 
 		const data = JSON.parse(fs.readFileSync(file, 'utf8'));

@@ -13,7 +13,9 @@ import path from 'path';
 	description: 'Give EXP to a player.'
 })
 export class GiveExpCommand extends Command {
-	public override registerApplicationCommands(registry: Command.Registry) {
+	public override registerApplicationCommands(
+		registry: Command.Registry
+	) {
 		registry.registerChatInputCommand((builder) =>
 			builder
 				.setName('giveexp')
@@ -37,111 +39,112 @@ export class GiveExpCommand extends Command {
 	}
 
 	public override async chatInputRun(
-	interaction: ChatInputCommandInteraction
-) {
-	try {
-		const target = interaction.options.getUser('user', true);
-		const amount = interaction.options.getInteger('amount', true);
+		interaction: ChatInputCommandInteraction
+	) {
+		try {
+			const target = interaction.options.getUser('user', true);
+			const amount = interaction.options.getInteger('amount', true);
 
-		const file = path.join(
-			process.cwd(),
-			'src',
-			'data',
-			'players.json'
-		);
+			const file = path.join(
+				process.cwd(),
+				'src',
+				'data',
+				'players.json'
+			);
 
-		const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+			const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 
-		// Nếu chưa có profile
-		if (!data[target.id]) {
-			data[target.id] = {
-				role: 'detective',
-				level: 1,
-				exp: 0,
-				accuracy: 0,
-				trust: 'Low',
-				casesSolved: 0,
-				casesPublished: 0,
-				correct: 0,
-				wrong: 0
-			};
-		}
+			if (!data[target.id]) {
+				data[target.id] = {
+					role: 'detective',
+					level: 1,
+					exp: 0,
+					accuracy: 0,
+					trust: 'Low',
+					casesSolved: 0,
+					casesPublished: 0,
+					correct: 0,
+					wrong: 0
+				};
+			}
 
-		const player = data[target.id];
+			const player = data[target.id];
 
-		const oldLevel = player.level;
+			const oldLevel = player.level;
 
-		// Cộng EXP
-		player.exp += amount;
+			// Give EXP
+			player.exp += amount;
 
-		// Tính level
-		player.level = Math.floor(player.exp / 100) + 1;
+			// Level Up
+			while (player.exp >= 100) {
+				player.exp -= 100;
+				player.level++;
+			}
 
-		const leveledUp = player.level > oldLevel;
+			const leveledUp = player.level > oldLevel;
 
-		fs.writeFileSync(
-			file,
-			JSON.stringify(data, null, 2)
-		);
+			fs.writeFileSync(
+				file,
+				JSON.stringify(data, null, 2)
+			);
 
-		const embed = new EmbedBuilder()
-			.setColor('#2ECC71')
-			.setTitle('⭐ EXP Awarded')
-			.setDescription(`${target} received **${amount} EXP!**`)
-			.addFields(
-				{
-					name: '🕵️ Role',
-					value: player.role,
-					inline: true
-				},
-				{
-					name: '⭐ Level',
-					value: `${player.level}`,
-					inline: true
-				},
-				{
-					name: '📚 Total EXP',
-					value: `${player.exp}`,
-					inline: true
-				},
-				{
-					name: '🎯 Accuracy',
-					value: `${player.accuracy}%`,
-					inline: true
-				},
-				{
-					name: '🤝 Trust',
-					value: player.trust,
-					inline: true
-				},
-				{
-					name: '📁 Cases Solved',
-					value: `${player.casesSolved}`,
-					inline: true
-				}
-			)
-			.setTimestamp();
+			const embed = new EmbedBuilder()
+				.setColor('#2ECC71')
+				.setTitle('⭐ EXP Awarded')
+				.setDescription(
+					`${target} received **${amount} EXP!**`
+				)
+				.addFields(
+					{
+						name: '🕵️ Role',
+						value: player.role,
+						inline: true
+					},
+					{
+						name: '⭐ Level',
+						value: `${player.level}`,
+						inline: true
+					},
+					{
+						name: '📚 EXP',
+						value: `${player.exp}/100`,
+						inline: true
+					},
+					{
+						name: '🎯 Accuracy',
+						value: `${player.accuracy}%`,
+						inline: true
+					},
+					{
+						name: '🤝 Trust',
+						value: player.trust,
+						inline: true
+					},
+					{
+						name: '📂 Cases Solved',
+						value: `${player.casesSolved}`,
+						inline: true
+					}
+				)
+				.setTimestamp();
 
-		if (leveledUp) {
-			embed.addFields({
-				name: '🎉 Level Up!',
-				value: `${target} advanced to **Level ${player.level}**!`
-			});
-		}
+			if (leveledUp) {
+				embed.addFields({
+					name: '🎉 Level Up!',
+					value: `${target} advanced to **Level ${player.level}**!`
+				});
+			}
 
-		await interaction.reply({
-			embeds: [embed]
-		});
-	} catch (error) {
-		console.error('GiveExp Error:', error);
-
-		if (!interaction.replied && !interaction.deferred) {
 			await interaction.reply({
-				content: '❌ An error occurred while executing this command.',
+				embeds: [embed]
+			});
+		} catch (error) {
+			console.error(error);
+
+			await interaction.reply({
+				content: '❌ Failed to give EXP.',
 				ephemeral: true
 			});
 		}
 	}
 }
-
-    }

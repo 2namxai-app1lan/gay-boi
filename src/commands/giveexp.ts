@@ -37,8 +37,9 @@ export class GiveExpCommand extends Command {
 	}
 
 	public override async chatInputRun(
-		interaction: ChatInputCommandInteraction
-	) {
+	interaction: ChatInputCommandInteraction
+) {
+	try {
 		const target = interaction.options.getUser('user', true);
 		const amount = interaction.options.getInteger('amount', true);
 
@@ -70,10 +71,10 @@ export class GiveExpCommand extends Command {
 
 		const oldLevel = player.level;
 
-		// Cộng tổng EXP
+		// Cộng EXP
 		player.exp += amount;
 
-		// Level = tổng EXP / 100
+		// Tính level
 		player.level = Math.floor(player.exp / 100) + 1;
 
 		const leveledUp = player.level > oldLevel;
@@ -131,5 +132,16 @@ export class GiveExpCommand extends Command {
 		await interaction.reply({
 			embeds: [embed]
 		});
+	} catch (error) {
+		console.error('GiveExp Error:', error);
+
+		if (!interaction.replied && !interaction.deferred) {
+			await interaction.reply({
+				content: '❌ An error occurred while executing this command.',
+				ephemeral: true
+			});
+		}
 	}
 }
+
+    }

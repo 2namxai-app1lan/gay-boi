@@ -1,25 +1,24 @@
 {
-  "1409021957986324561": {
-    "role": "director",
-    "level": 999,
+  "1512100160883392583": {
+    "role": "detective",
+    "level": 2,
     "exp": 0,
-    "accuracy": 100,
-    "trust": "MAXIMUM",
-    "casesSolved": 999,
-    "casesPublished": 999,
-    "correct": 999,
+    "accuracy": 0,
+    "trust": "Low",
+    "casesSolved": 0,
+    "casesPublished": 0,
+    "correct": 0,
     "wrong": 0
   },
-
-  "151234567890123456": {
+  "1409021957986324561": {
     "role": "detective",
-    "level": 12,
-    "exp": 20,
-    "accuracy": 87,
-    "trust": "High",
-    "casesSolved": 14,
+    "level": 2,
+    "exp": 0,
+    "accuracy": 0,
+    "trust": "Low",
+    "casesSolved": 0,
     "casesPublished": 0,
-    "correct": 14,
-    "wrong": 2
+    "correct": 0,
+    "wrong": 0
   }
 }

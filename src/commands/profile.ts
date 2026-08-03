@@ -1,6 +1,9 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
 	ChatInputCommandInteraction,
 	EmbedBuilder
 } from 'discord.js';
@@ -9,14 +12,24 @@ import fs from 'fs';
 import path from 'path';
 
 @ApplyOptions<Command.Options>({
-	description: 'View your detective profile.'
+	description: 'View a detective profile.'
 })
 export class ProfileCommand extends Command {
-	public override registerApplicationCommands(registry: Command.Registry) {
+	public override registerApplicationCommands(
+		registry: Command.Registry
+	) {
 		registry.registerChatInputCommand((builder) =>
 			builder
 				.setName('profile')
-				.setDescription('View your detective profile.')
+				.setDescription('View a detective profile.')
+				.addUserOption((option) =>
+					option
+						.setName('user')
+						.setDescription(
+							'View another detective profile.'
+						)
+						.setRequired(false)
+				)
 		);
 	}
 
@@ -30,20 +43,47 @@ export class ProfileCommand extends Command {
 			'players.json'
 		);
 
-		const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+		// Tạo players.json nếu chưa có
+		if (!fs.existsSync(file)) {
+			fs.mkdirSync(path.dirname(file), {
+				recursive: true
+			});
 
-		// Nếu chưa có profile
-		if (!data[interaction.user.id]) {
-			data[interaction.user.id] = {
+			fs.writeFileSync(file, '{}');
+		}
+
+		let data: Record<string, any> = {};
+
+		try {
+			const raw = fs
+				.readFileSync(file, 'utf8')
+				.trim();
+
+			data = raw ? JSON.parse(raw) : {};
+		} catch {
+			data = {};
+		}
+
+		// Người được xem profile
+		const targetUser =
+			interaction.options.getUser('user') ??
+			interaction.user;
+
+		const userId = targetUser.id;
+
+		// Tạo profile nếu người này chưa có
+		if (!data[userId]) {
+			data[userId] = {
 				role: 'detective',
 				level: 1,
 				exp: 0,
-				accuracy: 0,
 				trust: 'Low',
 				casesSolved: 0,
 				casesPublished: 0,
 				correct: 0,
-				wrong: 0
+				wrong: 0,
+				streak: 0,
+				badges: []
 			};
 
 			fs.writeFileSync(
@@ -52,9 +92,19 @@ export class ProfileCommand extends Command {
 			);
 		}
 
-		const player = data[interaction.user.id];
+		const player = data[userId];
 
-		// Accuracy tự tính
+		// Đảm bảo profile cũ có đủ dữ liệu
+		player.level ??= 1;
+		player.exp ??= 0;
+		player.trust ??= 'Low';
+		player.casesSolved ??= 0;
+		player.correct ??= 0;
+		player.wrong ??= 0;
+		player.streak ??= 0;
+		player.badges ??= [];
+
+		// Accuracy
 		const totalAnswers =
 			player.correct + player.wrong;
 
@@ -62,9 +112,10 @@ export class ProfileCommand extends Command {
 			totalAnswers === 0
 				? 0
 				: Math.round(
-						(player.correct / totalAnswers) *
+						(player.correct /
+							totalAnswers) *
 							100
-				  );
+					);
 
 		// Rank
 		let rank = 'Rookie Detective';
@@ -81,21 +132,43 @@ export class ProfileCommand extends Command {
 		if (player.level >= 50)
 			rank = 'Master Detective';
 
+		// Reputation
+		let reputation = '★☆☆☆☆';
+
+		if (player.trust === 'Medium') {
+			reputation = '★★★☆☆';
+		}
+
+		if (player.trust === 'High') {
+			reputation = '★★★★★';
+		}
+
+		// Nếu trust đang là số thì dùng luôn số đó
+		if (typeof player.trust === 'number') {
+			const stars = Math.max(
+				0,
+				Math.min(5, player.trust)
+			);
+
+			reputation =
+				'★'.repeat(stars) +
+				'☆'.repeat(5 - stars);
+		}
+
 		const embed = new EmbedBuilder()
 			.setColor('#5865F2')
-			.setTitle('🕵️ Detective Profile')
+			.setTitle(
+				`🕵️ ${targetUser.username}'s Profile`
+			)
 			.setThumbnail(
-				interaction.user.displayAvatarURL()
+				targetUser.displayAvatarURL({
+					size: 256
+				})
 			)
 			.addFields(
 				{
-					name: '👤 Detective',
-					value: interaction.user.username,
-					inline: true
-				},
-				{
-					name: '🕵️ Role',
-					value: player.role,
+					name: '🕵️ Detective',
+					value: targetUser.username,
 					inline: true
 				},
 				{
@@ -104,18 +177,13 @@ export class ProfileCommand extends Command {
 					inline: true
 				},
 				{
-					name: '📚 Total EXP',
-					value: `${player.exp}`,
+					name: '📈 EXP',
+					value: `${player.exp}/100`,
 					inline: true
 				},
 				{
-					name: '📂 Cases Solved',
+					name: '📁 Solved Cases',
 					value: `${player.casesSolved}`,
-					inline: true
-				},
-				{
-					name: '📝 Cases Published',
-					value: `${player.casesPublished}`,
 					inline: true
 				},
 				{
@@ -124,35 +192,44 @@ export class ProfileCommand extends Command {
 					inline: true
 				},
 				{
-					name: '🤝 Trust',
-					value: player.trust,
+					name: '🔥 Win Streak',
+					value: `${player.streak}`,
+					inline true
+				},
+				{
+					name: '🏆 Reputation',
+					value: reputation,
 					inline: true
 				},
 				{
-					name: '✅ Correct',
-					value: `${player.correct}`,
-					inline: true
-				},
-				{
-					name: '❌ Wrong',
-					value: `${player.wrong}`,
-					inline: true
-				},
-				{
-					name: '🏆 Rank',
+					name: '🏅 Rank',
 					value: rank,
 					inline: true
 				},
 				{
 					name: '💬 Motto',
 					value:
-						'*"Every clue tells a story."*'
+						'*"Do you smell the scent of blood, or the stench of sin?"*'
 				}
 			)
 			.setTimestamp();
 
+		const badgesButton = new ButtonBuilder()
+			.setCustomId(
+				`profile_badges_${userId}`
+			)
+			.setLabel('Huy hiệu')
+			.setEmoji('🏅')
+			.setStyle(ButtonStyle.Secondary);
+
+		const row =
+			new ActionRowBuilder<ButtonBuilder>().addComponents(
+				badgesButton
+			);
+
 		await interaction.reply({
-			embeds: [embed]
+			embeds: [embed],
+			components: [row]
 		});
 	}
 }

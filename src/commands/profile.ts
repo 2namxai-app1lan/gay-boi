@@ -194,7 +194,7 @@ export class ProfileCommand extends Command {
 				{
 					name: '🔥 Win Streak',
 					value: `${player.streak}`,
-					inline true
+					inline: true
 				},
 				{
 					name: '🏆 Reputation',

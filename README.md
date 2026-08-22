@@ -4,10 +4,14 @@
 
 ## Cách dùng
 
-### Prerequisite
+### Các câu lệnh (bao gồm đang có và project chưa xong) 
 
-```sh
-npm install
+```Mjob
+sẽ cho bạn đi làm trong nhà hàng như ngoài đời thiệt 💥
+có 3 công việc khác nhau
+- 【┆Bồi bàn
+- 【┆Phục vụ
+- 【┆Đầu bếp
 ```
 
 ### Development

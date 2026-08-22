@@ -29,6 +29,10 @@ mỗi role sẽ có 1 mục nhiệm vụ hoặc item riêng
 
 `sắp tới có thể làm thêm id`
 
+```Mcook```
+
+```công lệnh này dành cho công việc đầu bếp (đang trong giai đoạn phát triển)```
+
 ### Development
 
 This example can be run with `tsc-watch` to watch the files and automatically restart your bot.

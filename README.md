@@ -8,15 +8,15 @@
 
 ```Mjob```
 
-sẽ cho bạn đi làm trong nhà hàng như ngoài đời thiệt 💥
+`sẽ cho bạn đi làm trong nhà hàng như ngoài đời thiệt 💥
 có 3 công việc khác nhau
 - 【┆Bồi bàn
 - 【┆Phục vụ
-- 【┆Đầu bếp
+- 【┆Đầu bếp`
 
 ```Mprofile```
 
-hiển thị hồ sơ của bạn (bao gồm tiến trình/nghề nghiệp/bla bla) 
+`hiển thị hồ sơ của bạn (bao gồm tiến trình/nghề nghiệp/bla bla)`
 
 sắp tới cỏ thể làm thêm id
 

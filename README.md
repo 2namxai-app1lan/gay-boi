@@ -13,7 +13,8 @@
 ```có 3 công việc khác nhau
 - 【┆Bồi bàn
 - 【┆Phục vụ
-- 【┆Đầu bếp```
+- 【┆Đầu bếp
+```
 
 ```Mprofile```
 

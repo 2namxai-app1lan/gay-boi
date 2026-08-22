@@ -13,7 +13,7 @@ import path from 'path';
 
 @ApplyOptions<Command.Options>({
 	name: 'profile',
-	description: 'View a detective profile.'
+	description: 'View chef profile and ingredient inventory.'
 })
 export class ProfileCommand extends Command {
 	public override async messageRun(message: Message) {
@@ -24,188 +24,104 @@ export class ProfileCommand extends Command {
 			'players.json'
 		);
 
-		// Tạo players.json nếu chưa có
+		// Create players.json if it doesn't exist
 		if (!fs.existsSync(file)) {
-			fs.mkdirSync(path.dirname(file), {
-				recursive: true
-			});
-
+			fs.mkdirSync(path.dirname(file), { recursive: true });
 			fs.writeFileSync(file, '{}');
 		}
 
 		let data: Record<string, any> = {};
 
 		try {
-			const raw = fs
-				.readFileSync(file, 'utf8')
-				.trim();
-
+			const raw = fs.readFileSync(file, 'utf8').trim();
 			data = raw ? JSON.parse(raw) : {};
 		} catch {
 			data = {};
 		}
 
-		// Lấy người dùng được tag (@user) hoặc lấy chính người gửi tin nhắn
-		const targetUser =
-			message.mentions.users.first() ?? message.author;
-
+		// Get mentioned user or default to message author
+		const targetUser = message.mentions.users.first() ?? message.author;
 		const userId = targetUser.id;
 
-		// Tạo profile nếu người này chưa có
+		// Check if user has the "Cái thớt" role in the server
+		const member = message.guild?.members.cache.get(userId);
+		const isCuttingBoard = member?.roles.cache.some(
+			(role) => role.name.includes('Cái thớt')
+		);
+
+		// Initialize profile data if not present
 		if (!data[userId]) {
 			data[userId] = {
-				role: 'detective',
 				level: 1,
 				exp: 0,
-				trust: 'Low',
-				casesSolved: 0,
-				casesPublished: 0,
-				correct: 0,
-				wrong: 0,
-				streak: 0,
-				badges: []
+				dishesCooked: 0,
+				inventory: {
+					meat: 5,   // 🥩 Meat
+					veggie: 5, // 🥦 Veggies
+					spice: 5   // 🧂 Spices
+				}
 			};
 
-			fs.writeFileSync(
-				file,
-				JSON.stringify(data, null, 2)
-			);
+			fs.writeFileSync(file, JSON.stringify(data, null, 2));
 		}
 
 		const player = data[userId];
 
-		// Đảm bảo profile cũ có đủ dữ liệu
+		// Ensure existing profiles have default values
 		player.level ??= 1;
 		player.exp ??= 0;
-		player.trust ??= 'Low';
-		player.casesSolved ??= 0;
-		player.correct ??= 0;
-		player.wrong ??= 0;
-		player.streak ??= 0;
-		player.badges ??= [];
+		player.dishesCooked ??= 0;
+		player.inventory ??= { meat: 5, veggie: 5, spice: 5 };
 
-		// Accuracy
-		const totalAnswers =
-			player.correct + player.wrong;
+		// Determine Chef Title
+		let chefTitle = '🧑‍🍳 Apprentice Chef';
 
-		const accuracy =
-			totalAnswers === 0
-				? 0
-				: Math.round(
-						(player.correct /
-							totalAnswers) *
-							100
-					);
-
-		// Rank
-		let rank = 'Rookie Detective';
-
-		if (player.level >= 10)
-			rank = 'Junior Detective';
-
-		if (player.level >= 20)
-			rank = 'Senior Detective';
-
-		if (player.level >= 35)
-			rank = 'Lead Detective';
-
-		if (player.level >= 50)
-			rank = 'Master Detective';
-
-		// Reputation
-		let reputation = '★☆☆☆☆';
-
-		if (player.trust === 'Medium') {
-			reputation = '★★★☆☆';
-		}
-
-		if (player.trust === 'High') {
-			reputation = '★★★★★';
-		}
-
-		// Nếu trust đang là số thì dùng luôn số đó
-		if (typeof player.trust === 'number') {
-			const stars = Math.max(
-				0,
-				Math.min(5, player.trust)
-			);
-
-			reputation =
-				'★'.repeat(stars) +
-				'☆'.repeat(5 - stars);
+		if (isCuttingBoard) {
+			chefTitle = '👽 Supreme Judge "Cutting Board"';
+		} else if (player.level >= 50) {
+			chefTitle = '👑 Legendary Head Chef';
+		} else if (player.level >= 30) {
+			chefTitle = '🌟 Executive Chef';
+		} else if (player.level >= 10) {
+			chefTitle = '🍳 Sous Chef';
 		}
 
 		const embed = new EmbedBuilder()
-			.setColor('#5865F2')
-			.setTitle(
-				`🕵️ ${targetUser.username}'s Profile`
-			)
-			.setThumbnail(
-				targetUser.displayAvatarURL({
-					size: 256
-				})
-			)
+			.setColor('#FF9900')
+			.setTitle(`🍳 Kitchen Profile: ${targetUser.username}`)
+			.setThumbnail(targetUser.displayAvatarURL({ size: 256 }))
 			.addFields(
 				{
-					name: '🕵️ Detective',
-					value: targetUser.username,
-					inline: true
+					name: '🎖️ Chef Title',
+					value: chefTitle,
+					inline: false
 				},
 				{
 					name: '⭐ Level',
-					value: `${player.level}`,
+					value: `Level ${player.level} (${player.exp}/100 EXP)`,
 					inline: true
 				},
 				{
-					name: '📈 EXP',
-					value: `${player.exp}/100`,
+					name: '🍲 Dishes Cooked',
+					value: `${player.dishesCooked} dishes`,
 					inline: true
 				},
 				{
-					name: '📁 Solved Cases',
-					value: `${player.casesSolved}`,
-					inline: true
-				},
-				{
-					name: '🎯 Accuracy',
-					value: `${accuracy}%`,
-					inline: true
-				},
-				{
-					name: '🔥 Win Streak',
-					value: `${player.streak}`,
-					inline: true
-				},
-				{
-					name: '🏆 Reputation',
-					value: reputation,
-					inline: true
-				},
-				{
-					name: '🏅 Rank',
-					value: rank,
-					inline: true
-				},
-				{
-					name: '💬 Motto',
-					value:
-						'*"Do you smell the scent of blood, or the stench of sin?"*'
+					name: '🧺 Ingredient Inventory',
+					value: `🥩 **Meat:** ${player.inventory.meat}\n🥦 **Veggies:** ${player.inventory.veggie}\n🧂 **Spices:** ${player.inventory.spice}`,
+					inline: false
 				}
 			)
+			.setFooter({ text: 'Type mcook to start cooking!' })
 			.setTimestamp();
 
-		const badgesButton = new ButtonBuilder()
-			.setCustomId(
-				`profile_badges_${userId}`
-			)
-			.setLabel('Huy hiệu')
-			.setEmoji('🏅')
-			.setStyle(ButtonStyle.Secondary);
+		const cookButton = new ButtonBuilder()
+			.setCustomId(`profile_cook_${userId}`)
+			.setLabel('Start Cooking')
+			.setEmoji('🍳')
+			.setStyle(ButtonStyle.Success);
 
-		const row =
-			new ActionRowBuilder<ButtonBuilder>().addComponents(
-				badgesButton
-			);
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(cookButton);
 
 		await message.reply({
 			embeds: [embed],

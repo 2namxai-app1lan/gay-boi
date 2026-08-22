@@ -1,8 +1,8 @@
 # Bot Mayo đến từ bếp 💥
 
-This is a basic setup of a Discord bot using the [sapphire framework][sapphire] written in TypeScript
+đây là bot thử nghiệm xài [sapphire framework][sapphire] được viết trong ypeScript
 
-## How to use it?
+## Cách dùng
 
 ### Prerequisite
 

@@ -2,19 +2,13 @@ import './lib/setup';
 
 import { LogLevel, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits } from 'discord.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Thiết lập đường dẫn thư mục chuẩn cho ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const client = new SapphireClient({
 	defaultPrefix: 'm',
 	caseInsensitiveCommands: true,
 	caseInsensitivePrefixes: true,
 
-	// 📁 Chỉ định thư mục gốc để Sapphire tự động quét thư mục commands/
+	// 📁 Đường dẫn thư mục để Sapphire tự động quét các file lệnh trong commands/
 	baseUserDirectory: __dirname,
 
 	logger: {

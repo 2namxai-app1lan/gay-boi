@@ -100,14 +100,12 @@ export class JobCommand extends Command {
 			components: [row]
 		});
 
-		// Tạo collector để lắng nghe sự kiện bấm nút trong 60 giây
 		const collector = responseMessage.createMessageComponentCollector({
 			componentType: ComponentType.Button,
 			time: 60000
 		});
 
 		collector.on('collect', async (interaction) => {
-			// Chỉ cho phép đúng người gõ lệnh được bấm nút
 			if (interaction.user.id !== userId) {
 				await interaction.reply({
 					content: '❌ Single-player menu! Type `mjob` to open your own.',
@@ -130,11 +128,9 @@ export class JobCommand extends Command {
 				roleName = 'Receptionist';
 			}
 
-			// 1. Cập nhật dữ liệu vào players.json
 			data[userId].job = selectedJob;
 			fs.writeFileSync(file, JSON.stringify(data, null, 2));
 
-			// 2. Tự động cộng Role trên Discord (nếu role có tồn tại trong Server)
 			let roleMsg = '';
 			const guildRole = interaction.guild?.roles.cache.find(
 				(r) => r.name.toLowerCase() === roleName.toLowerCase()
@@ -148,7 +144,6 @@ export class JobCommand extends Command {
 				}
 			}
 
-			// Vô hiệu hóa các nút sau khi đã chọn xong
 			const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
 				waiterBtn.setDisabled(true),
 				chefBtn.setDisabled(true),

@@ -43,7 +43,7 @@ export class ProfileCommand extends Command {
 
 		if (!data[userId]) {
 			data[userId] = {
-				job: 'Unemployed', // Chưa có việc
+				job: 'Unemployed',
 				level: 1,
 				exp: 0,
 				dishesCooked: 0,
@@ -61,7 +61,6 @@ export class ProfileCommand extends Command {
 		player.dishesCooked ??= 0;
 		player.inventory ??= { meat: 5, veggie: 5, spice: 5 };
 
-		// Tên hiển thị công việc
 		const jobDisplayNames: Record<string, string> = {
 			waiter: '🍵 Waiter (Bồi Bàn)',
 			chef: '🍳 Chef (Đầu Bếp)',

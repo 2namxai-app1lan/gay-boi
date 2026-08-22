@@ -18,11 +18,16 @@
 
 ```Mprofile```
 
-```hiển thị hồ sơ của bạn (bao gồm tiến trình/
-   nghề nghiệp/bla bla)
+```hiển thị hồ sơ của bạn
+Bao gồm:
+• chức danh đầu bếp (đối với ai chọn nghề là đầu bếp) 
+• nghề nghiệp hiện tại
+•  level
+chung chung là vậy
+mỗi role sẽ có 1 mục nhiệm vụ hoặc item riêng
 ```
 
-sắp tới cỏ thể làm thêm id
+`sắp tới cỏ thể làm thêm id`
 
 ### Development
 

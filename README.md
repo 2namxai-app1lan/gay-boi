@@ -6,8 +6,8 @@
 
 ### Các câu lệnh (bao gồm đang có và project chưa xong) 
 
-```Mjob
-```
+```Mjob```
+
 sẽ cho bạn đi làm trong nhà hàng như ngoài đời thiệt 💥
 có 3 công việc khác nhau
 - 【┆Bồi bàn

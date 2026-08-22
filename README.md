@@ -15,8 +15,10 @@ có 3 công việc khác nhau
 - 【┆Đầu bếp
 
 ```Mprofile```
+
 hiển thị hồ sơ của bạn (bao gồm tiến trình/nghề nghiệp/bla bla) 
--# sắp tới cỏ thể làm thêm id
+
+sắp tới cỏ thể làm thêm id
 
 ### Development
 

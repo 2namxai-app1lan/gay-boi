@@ -4,38 +4,19 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	ChatInputCommandInteraction,
-	EmbedBuilder
+	EmbedBuilder,
+	Message
 } from 'discord.js';
 
 import fs from 'fs';
 import path from 'path';
 
 @ApplyOptions<Command.Options>({
+	name: 'profile',
 	description: 'View a detective profile.'
 })
 export class ProfileCommand extends Command {
-	public override registerApplicationCommands(
-		registry: Command.Registry
-	) {
-		registry.registerChatInputCommand((builder) =>
-			builder
-				.setName('profile')
-				.setDescription('View a detective profile.')
-				.addUserOption((option) =>
-					option
-						.setName('user')
-						.setDescription(
-							'View another detective profile.'
-						)
-						.setRequired(false)
-				)
-		);
-	}
-
-	public override async chatInputRun(
-		interaction: ChatInputCommandInteraction
-	) {
+	public override async messageRun(message: Message) {
 		const file = path.join(
 			process.cwd(),
 			'src',
@@ -64,10 +45,9 @@ export class ProfileCommand extends Command {
 			data = {};
 		}
 
-		// Người được xem profile
+		// Lấy người dùng được tag (@user) hoặc lấy chính người gửi tin nhắn
 		const targetUser =
-			interaction.options.getUser('user') ??
-			interaction.user;
+			message.mentions.users.first() ?? message.author;
 
 		const userId = targetUser.id;
 
@@ -227,7 +207,7 @@ export class ProfileCommand extends Command {
 				badgesButton
 			);
 
-		await interaction.reply({
+		await message.reply({
 			embeds: [embed],
 			components: [row]
 		});

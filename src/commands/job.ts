@@ -44,8 +44,6 @@ export class JobCommand extends Command {
 			};
 		}
 
-		const player = data[userId];
-
 		// Bảng giới thiệu công việc (Tutorial Embed)
 		const embed = new EmbedBuilder()
 			.setColor('#FEE75C')

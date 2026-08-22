@@ -12,6 +12,9 @@ import {
 import fs from 'fs';
 import path from 'path';
 
+// Thời gian cooldown: 120 ngày tính bằng miligiây
+const COOLDOWN_MS = 120 * 24 * 60 * 60 * 1000;
+
 @ApplyOptions<Command.Options>({
 	name: 'job',
 	aliases: ['xinviec'],
@@ -42,15 +45,31 @@ export class JobCommand extends Command {
 				level: 1,
 				exp: 0,
 				dishesCooked: 0,
-				inventory: { meat: 5, veggie: 5, spice: 5 }
+				inventory: { meat: 5, veggie: 5, spice: 5 },
+				lastJobChange: 0
 			};
+		}
+
+		const player = data[userId];
+		const now = Date.now();
+
+		// Kiểm tra Cooldown 4 tháng (120 ngày)
+		if (player.job !== 'Unemployed' && player.lastJobChange) {
+			const timePassed = now - player.lastJobChange;
+			if (timePassed < COOLDOWN_MS) {
+				const remainingDays = Math.ceil((COOLDOWN_MS - timePassed) / (24 * 60 * 60 * 1000));
+				await message.reply(
+					`⏳ **Bạn đang trong hợp đồng làm việc!**\nBạn cần đợi thêm **${remainingDays} ngày** nữa (đủ 4 tháng) mới có thể đổi công việc mới tại nhà hàng "Hết Khô Gà" 🐔❌.`
+				);
+				return;
+			}
 		}
 
 		const embed = new EmbedBuilder()
 			.setColor('#FEE75C')
 			.setTitle('🏪 "Hết Khô Gà" Restaurant Recruitment')
 			.setDescription(
-				'Welcome to **"Hết Khô Gà" Restaurant**! 🐔❌\nChoose your position below to start working:'
+				'Welcome to **"Hết Khô Gà" Restaurant**! 🐔❌\nChoose your position below to start working (Contract duration: 4 months):'
 			)
 			.addFields(
 				{
@@ -128,7 +147,9 @@ export class JobCommand extends Command {
 				roleName = 'Receptionist';
 			}
 
+			// Cập nhật job và lưu mốc thời gian chọn
 			data[userId].job = selectedJob;
+			data[userId].lastJobChange = Date.now();
 			fs.writeFileSync(file, JSON.stringify(data, null, 2));
 
 			let roleMsg = '';
@@ -151,7 +172,7 @@ export class JobCommand extends Command {
 			);
 
 			await interaction.update({
-				content: `🎉 **Congratulations!** You are now a **${roleName}** at "Hết Khô Gà" Restaurant! 🐔❌${roleMsg}\nType \`mprofile\` to check your profile.`,
+				content: `🎉 **Congratulations!** You are now a **${roleName}** at "Hết Khô Gà" Restaurant! 🐔❌${roleMsg}\n📜 *Contract locked for 4 months.* Type \`mprofile\` to check your profile.`,
 				components: [disabledRow]
 			});
 

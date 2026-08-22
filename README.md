@@ -31,9 +31,8 @@ mỗi role sẽ có 1 mục nhiệm vụ hoặc item riêng
 
 ```Mcook```
 
-``` câu lệnh này dành cho công việc đầu bếp 
-• (đang trong giai đoạn phát triển)
-```
+`câu lệnh này dành cho công việc đầu bếp 
+• (đang trong giai đoạn phát triển)`
 
 ### Development
 

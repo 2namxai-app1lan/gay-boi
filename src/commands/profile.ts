@@ -13,18 +13,12 @@ import path from 'path';
 
 @ApplyOptions<Command.Options>({
 	name: 'profile',
-	description: 'View chef profile and ingredient inventory.'
+	description: 'View chef profile, job, and ingredient inventory.'
 })
 export class ProfileCommand extends Command {
 	public override async messageRun(message: Message) {
-		const file = path.join(
-			process.cwd(),
-			'src',
-			'data',
-			'players.json'
-		);
+		const file = path.join(process.cwd(), 'src', 'data', 'players.json');
 
-		// Create players.json if it doesn't exist
 		if (!fs.existsSync(file)) {
 			fs.mkdirSync(path.dirname(file), { recursive: true });
 			fs.writeFileSync(file, '{}');
@@ -39,27 +33,21 @@ export class ProfileCommand extends Command {
 			data = {};
 		}
 
-		// Get mentioned user or default to message author
 		const targetUser = message.mentions.users.first() ?? message.author;
 		const userId = targetUser.id;
 
-		// Check if user has the "Cái thớt" role in the server
 		const member = message.guild?.members.cache.get(userId);
-		const isCuttingBoard = member?.roles.cache.some(
-			(role) => role.name.includes('Cái thớt')
+		const isCuttingBoard = member?.roles.cache.some((role) =>
+			role.name.includes('Cái thớt')
 		);
 
-		// Initialize profile data if not present
 		if (!data[userId]) {
 			data[userId] = {
+				job: 'Unemployed', // Chưa có việc
 				level: 1,
 				exp: 0,
 				dishesCooked: 0,
-				inventory: {
-					meat: 5,   // 🥩 Meat
-					veggie: 5, // 🥦 Veggies
-					spice: 5   // 🧂 Spices
-				}
+				inventory: { meat: 5, veggie: 5, spice: 5 }
 			};
 
 			fs.writeFileSync(file, JSON.stringify(data, null, 2));
@@ -67,15 +55,21 @@ export class ProfileCommand extends Command {
 
 		const player = data[userId];
 
-		// Ensure existing profiles have default values
+		player.job ??= 'Unemployed';
 		player.level ??= 1;
 		player.exp ??= 0;
 		player.dishesCooked ??= 0;
 		player.inventory ??= { meat: 5, veggie: 5, spice: 5 };
 
-		// Determine Chef Title
-		let chefTitle = '🧑‍🍳 Apprentice Chef';
+		// Tên hiển thị công việc
+		const jobDisplayNames: Record<string, string> = {
+			waiter: '🍵 Waiter (Bồi Bàn)',
+			chef: '🍳 Chef (Đầu Bếp)',
+			receptionist: '📋 Receptionist (Lễ Tân)',
+			Unemployed: '❓ Unemployed (Chưa có việc)'
+		};
 
+		let chefTitle = '🧑‍🍳 Apprentice Chef';
 		if (isCuttingBoard) {
 			chefTitle = '👽 Supreme Judge "Cutting Board"';
 		} else if (player.level >= 50) {
@@ -94,7 +88,12 @@ export class ProfileCommand extends Command {
 				{
 					name: '🎖️ Chef Title',
 					value: chefTitle,
-					inline: false
+					inline: true
+				},
+				{
+					name: '💼 Current Job',
+					value: jobDisplayNames[player.job] || player.job,
+					inline: true
 				},
 				{
 					name: '⭐ Level',

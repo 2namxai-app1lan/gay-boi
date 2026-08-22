@@ -13,7 +13,10 @@ có 3 công việc khác nhau
 - 【┆Bồi bàn
 - 【┆Phục vụ
 - 【┆Đầu bếp
-```
+
+```Mprofile```
+hiển thị hồ sơ của bạn (bao gồm tiến trình/nghề nghiệp/bla bla) 
+-# sắp tới cỏ thể làm thêm id
 
 ### Development
 

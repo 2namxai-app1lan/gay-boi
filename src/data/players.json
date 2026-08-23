@@ -1,24 +1,32 @@
 {
-  "1512100160883392583": {
-    "role": "detective",
-    "level": 2,
+  "123456789012345678": {
+    "job": "chef",
+    "level": 1,
     "exp": 0,
-    "accuracy": 0,
-    "trust": "Low",
-    "casesSolved": 0,
-    "casesPublished": 0,
-    "correct": 0,
-    "wrong": 0
-  },
-  "1409021957986324561": {
-    "role": "detective",
-    "level": 2,
-    "exp": 0,
-    "accuracy": 0,
-    "trust": "Low",
-    "casesSolved": 0,
-    "casesPublished": 0,
-    "correct": 0,
-    "wrong": 0
+    "coins": 1000,
+    "dishesCooked": 0,
+    "tablesServed": 0,
+    "guestsWelcomed": 0,
+    "lastJobChange": 0,
+    "inventory": {
+      "meats": {
+        "chicken": 5,
+        "beef": 2,
+        "pork": 3,
+        "duck": 0
+      },
+      "veggies": {
+        "cabbage": 5,
+        "lettuce": 5,
+        "water_spinach": 3,
+        "garland_chrysanthemum": 0
+      },
+      "spices": {
+        "pepper": 5,
+        "chili_sauce": 5,
+        "ketchup": 5,
+        "fish_sauce": 5
+      }
+    }
   }
 }

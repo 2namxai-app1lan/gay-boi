@@ -19,7 +19,8 @@ có 3 công việc khác nhau
 
 ```Mprofile```
 
-```hiển thị hồ sơ của bạn
+```
+hiển thị hồ sơ của bạn
 Bao gồm:
 • chức danh đầu bếp (đối với ai chọn nghề là đầu bếp) 
 • nghề nghiệp hiện tại
@@ -32,8 +33,10 @@ mỗi role sẽ có 1 mục nhiệm vụ hoặc item riêng
 
 ```Mcook```
 
-`câu lệnh này dành cho công việc đầu bếp 
-• (đang trong giai đoạn phát triển)`
+```
+câu lệnh này dành cho công việc đầu bếp 
+• (đang trong giai đoạn phát triển)
+```
 
 ### Development
 

@@ -11,46 +11,29 @@ import {
 import fs from 'fs';
 import path from 'path';
 
-// Danh sách dữ liệu công thức chuẩn
+// Danh sách tên nguyên liệu tiếng Việt
+const ITEM_NAMES: Record<string, string> = {
+    chicken: '🍗 Gà',
+    beef: '🥩 Bò',
+    pork: '🐖 Thịt Heo',
+    duck: '🦆 Vịt',
+    cabbage: '🥬 Bắp Cải',
+    lettuce: '🥗 Xà Lách',
+    water_spinach: '🌱 Rau Muống',
+    garland_chrysanthemum: '🌿 Rau Cúc',
+    pepper: '🌶️ Tiêu/Ớt',
+    chili_sauce: '🥫 Tương Ớt',
+    ketchup: '🍅 Tương Cà',
+    fish_sauce: '🍾 Nước Mắm'
+};
+
 const RECIPES: Record<string, any> = {
-    // 🔰 LEVEL 1
-    'rau luoc': { name: 'Rau Luộc', levelReq: 1, req: { cabbage: 2 }, time: 10000, rewardCoins: 150, rewardExp: 15 },
-    'rau xao': { name: 'Rau Xào', levelReq: 1, req: { cabbage: 2, pepper: 1 }, time: 12000, rewardCoins: 180, rewardExp: 18 },
-    'banh mi': { name: 'Bánh Mì', levelReq: 1, req: { pepper: 1 }, time: 8000, rewardCoins: 100, rewardExp: 10 },
-    'banh bao chien': { name: 'Bánh Bao Chiên', levelReq: 1, req: { chili_sauce: 1 }, time: 10000, rewardCoins: 120, rewardExp: 12 },
-    'ngo chien': { name: 'Ngô Chiên', levelReq: 1, req: { cabbage: 1, pepper: 1 }, time: 10000, rewardCoins: 130, rewardExp: 13 },
-    'khoai chien': { name: 'Khoai Chiên', levelReq: 1, req: { cabbage: 1, ketchup: 1 }, time: 10000, rewardCoins: 130, rewardExp: 13 },
-    'sup': { name: 'Súp Khai Vị', levelReq: 1, req: { chicken: 1, pepper: 1 }, time: 15000, rewardCoins: 220, rewardExp: 22 },
-    'salad': { name: 'Salad Tươi', levelReq: 1, req: { lettuce: 2, pepper: 1 }, time: 10000, rewardCoins: 160, rewardExp: 16 },
-
-    // 🥣 LEVEL 2
-    'canh rau cuc': { name: 'Canh Rau Cúc', levelReq: 2, req: { garland_chrysanthemum: 2, fish_sauce: 1 }, time: 15000, rewardCoins: 250, rewardExp: 25 },
-    'canh rau cai': { name: 'Canh Rau Cải', levelReq: 2, req: { cabbage: 2, fish_sauce: 1 }, time: 15000, rewardCoins: 250, rewardExp: 25 },
-    'canh rau muong': { name: 'Canh Rau Muống', levelReq: 2, req: { water_spinach: 2, fish_sauce: 1 }, time: 15000, rewardCoins: 250, rewardExp: 25 },
-    'rau cai xao': { name: 'Rau Cải Xào', levelReq: 2, req: { cabbage: 2, pepper: 1 }, time: 15000, rewardCoins: 240, rewardExp: 24 },
-    'rau muong xao': { name: 'Rau Muống Xào', levelReq: 2, req: { water_spinach: 2, pepper: 1 }, time: 15000, rewardCoins: 240, rewardExp: 24 },
-
-    // 🥩 LEVEL 3
-    'bo xao rau muong': { name: 'Bò Xào Rau Muống', levelReq: 3, req: { beef: 2, water_spinach: 1, fish_sauce: 1 }, time: 20000, rewardCoins: 450, rewardExp: 40 },
-    'bo luc lac': { name: 'Bò Lúc Lắc', levelReq: 3, req: { beef: 2, lettuce: 1, chili_sauce: 1 }, time: 20000, rewardCoins: 480, rewardExp: 45 },
-    'bo nuong': { name: 'Bò Nướng', levelReq: 3, req: { beef: 2, chili_sauce: 1 }, time: 22000, rewardCoins: 500, rewardExp: 50 },
-    'thit nuong': { name: 'Thịt Heo Nướng', levelReq: 3, req: { pork: 2, chili_sauce: 1 }, time: 20000, rewardCoins: 420, rewardExp: 38 },
-    'thit nuong lo bi': { name: 'Thịt Nướng Lổ Bì 💥', levelReq: 3, req: { pork: 3, pepper: 1, fish_sauce: 1 }, time: 25000, rewardCoins: 600, rewardExp: 60 },
-    'thit luoc': { name: 'Thịt Heo Luộc', levelReq: 3, req: { pork: 2, fish_sauce: 1 }, time: 18000, rewardCoins: 380, rewardExp: 35 },
-    'bi heo luoc': { name: 'Bì Heo Luộc Bột Canh 💥', levelReq: 3, req: { pork: 2, pepper: 1 }, time: 18000, rewardCoins: 400, rewardExp: 38 },
-    'top mo': { name: 'Tóp Mỡ Giòn Rụm', levelReq: 3, req: { pork: 2, chili_sauce: 1 }, time: 15000, rewardCoins: 350, rewardExp: 30 },
-    'kho quet': { name: 'Kho Quẹt', levelReq: 3, req: { pork: 1, fish_sauce: 2, chili_sauce: 1 }, time: 22000, rewardCoins: 480, rewardExp: 45 },
-    'vit nuong': { name: 'Vịt Nướng', levelReq: 3, req: { duck: 2, chili_sauce: 1 }, time: 22000, rewardCoins: 520, rewardExp: 50 },
-    'vit om': { name: 'Vịt Om', levelReq: 3, req: { duck: 2, cabbage: 1, fish_sauce: 1 }, time: 25000, rewardCoins: 550, rewardExp: 55 },
-    'ngan luoc': { name: 'Ngan Luộc', levelReq: 3, req: { duck: 2, fish_sauce: 1 }, time: 20000, rewardCoins: 460, rewardExp: 42 },
-    'vit luoc': { name: 'Vịt Luộc', levelReq: 3, req: { duck: 2, fish_sauce: 1 }, time: 20000, rewardCoins: 460, rewardExp: 42 },
-    'ga chien': { name: 'Gà Chiên Giòn', levelReq: 3, req: { chicken: 2, chili_sauce: 1 }, time: 18000, rewardCoins: 400, rewardExp: 38 },
-    'ga xao': { name: 'Gà Xào Sả Ớt', levelReq: 3, req: { chicken: 2, pepper: 1 }, time: 18000, rewardCoins: 400, rewardExp: 38 },
-    'ga nuong': { name: 'Gà Nướng Mật Ong', levelReq: 3, req: { chicken: 2, chili_sauce: 1 }, time: 22000, rewardCoins: 480, rewardExp: 45 },
-
-    // 🔥 LEVEL 5
-    'kho ga': { name: 'Khô Gà Lá Chanh 💥', levelReq: 5, req: { chicken: 3, chili_sauce: 2, pepper: 1 }, time: 30000, rewardCoins: 800, rewardExp: 80 },
-    'kho bo': { name: 'Khô Bò Sợi 💥', levelReq: 5, req: { beef: 3, chili_sauce: 2, pepper: 1 }, time: 30000, rewardCoins: 900, rewardExp: 90 }
+    'rau luoc': { name: 'Rau Luộc', levelReq: 1, req: ['cabbage'], time: 10000, rewardCoins: 150, rewardExp: 15 },
+    'rau xao': { name: 'Rau Xào', levelReq: 1, req: ['cabbage', 'pepper'], time: 12000, rewardCoins: 180, rewardExp: 18 },
+    'banh mi': { name: 'Bánh Mì', levelReq: 1, req: ['pepper'], time: 8000, rewardCoins: 100, rewardExp: 10 },
+    'salad': { name: 'Salad Tươi', levelReq: 1, req: ['lettuce', 'pepper'], time: 10000, rewardCoins: 160, rewardExp: 16 },
+    'bo luc lac': { name: 'Bò Lúc Lắc', levelReq: 3, req: ['beef', 'lettuce', 'chili_sauce'], time: 15000, rewardCoins: 480, rewardExp: 45 },
+    'kho ga': { name: 'Khô Gà Lá Chanh 💥', levelReq: 5, req: ['chicken', 'chili_sauce', 'pepper'], time: 20000, rewardCoins: 800, rewardExp: 80 }
 };
 
 @ApplyOptions<Command.Options>({
@@ -74,7 +57,6 @@ export class CookCommand extends Command {
 
         const userId = message.author.id;
 
-        // Khởi tạo hồ sơ người chơi
         if (!data[userId]) {
             data[userId] = {
                 job: 'Chef',
@@ -83,10 +65,9 @@ export class CookCommand extends Command {
                 coins: 1000,
                 isNewbie: true,
                 inventory: {
-                    meats: { chicken: 5, beef: 2, pork: 3, duck: 2 },
-                    veggies: { cabbage: 5, lettuce: 5, water_spinach: 3, garland_chrysanthemum: 2 },
-                    spices: { pepper: 5, chili_sauce: 5, ketchup: 5, fish_sauce: 5 },
-                    coupons: 1
+                    meats: { chicken: 5, beef: 5, pork: 5, duck: 5 },
+                    veggies: { cabbage: 5, lettuce: 5, water_spinach: 5, garland_chrysanthemum: 5 },
+                    spices: { pepper: 5, chili_sauce: 5, ketchup: 5, fish_sauce: 5 }
                 }
             };
             fs.writeFileSync(file, JSON.stringify(data, null, 2));
@@ -94,18 +75,16 @@ export class CookCommand extends Command {
 
         const player = data[userId];
 
-        // 🌟 1. HIỂN THỊ TUTORIAL NẾU LÀ TÂN THỦ
         if (player.isNewbie) {
             const tutorialEmbed = new EmbedBuilder()
                 .setColor('#5865F2')
                 .setTitle('🔰 HƯỚNG DẪN TÂN THỦ ĐẦU BẾP')
                 .setDescription(
-                    `Chào mừng bạn đến với căn bếp! Hãy bắt đầu với món ăn đơn giản nhất.\n\n` +
-                    `📖 **Bước 1:** Gõ \`mrecipe\` để mở sổ tay công thức.\n` +
-                    `🍳 **Bước 2:** Hãy thử gõ \`mcook rau luoc\` để thực hành nấu món đầu tiên!\n` +
-                    `⏱️ **Lưu ý:** Hãy bấm nút **"Bê Món Ra"** trước khi hết giờ đếm ngược!`
-                )
-                .setFooter({ text: 'Gõ mcook rau luoc ngay nhé!' });
+                    `Chào mừng bạn đến với căn bếp!\n\n` +
+                    `📖 **Bước 1:** Gõ \`mrecipe\` để nhớ công thức.\n` +
+                    `🍳 **Bước 2:** Gõ \`mcook rau luoc\` để bắt đầu.\n` +
+                    `🎯 **Nhiệm vụ:** Thời gian đếm ngược sẽ chạy ngay lập tức! Bạn phải chọn đúng các nguyên liệu bằng nút bấm bên dưới trước khi hết giờ!`
+                );
 
             player.isNewbie = false;
             fs.writeFileSync(file, JSON.stringify(data, null, 2));
@@ -114,56 +93,45 @@ export class CookCommand extends Command {
             return;
         }
 
-        // 🌟 2. XỬ LÝ LỆNH NẤU ÁN
         const recipeKey = (await args.rest('string').catch(() => '')).toLowerCase().trim();
         const recipe = RECIPES[recipeKey];
 
         if (!recipe) {
-            await message.reply('❌ Món ăn không tồn tại! Gõ `mrecipe` để xem danh sách công thức chuẩn.');
+            await message.reply('❌ Món ăn không tồn tại! Gõ `mrecipe` để xem công thức.');
             return;
         }
 
-        // Kiểm tra Level
-        const playerLevel = player.level || 1;
-        if (playerLevel < recipe.levelReq) {
-            await message.reply(`🔒 Bạn chưa đủ cấp độ! Món **${recipe.name}** yêu cầu **Level ${recipe.levelReq}** (Level hiện tại của bạn: \`${playerLevel}\`).`);
+        if ((player.level || 1) < recipe.levelReq) {
+            await message.reply(`🔒 Bạn cần **Level ${recipe.levelReq}** để nấu món **${recipe.name}**!`);
             return;
         }
 
-        // Kiểm tra nguyên liệu trong kho
-        const meats = player.inventory?.meats || {};
-        const veggies = player.inventory?.veggies || {};
-        const spices = player.inventory?.spices || {};
+        // Tạo danh sách nút nguyên liệu (Bao gồm nguyên liệu đúng + 2 nguyên liệu nhiễu)
+        const requiredItems: string[] = recipe.req;
+        const allPossibleItems = Object.keys(ITEM_NAMES);
+        const wrongItems = allPossibleItems.filter(i => !requiredItems.includes(i)).sort(() => 0.5 - Math.random()).slice(0, 2);
+        const displayButtons = [...requiredItems, ...wrongItems].sort(() => 0.5 - Math.random());
 
-        for (const [item, amount] of Object.entries(recipe.req)) {
-            const currentAmount = (meats[item] || 0) + (veggies[item] || 0) + (spices[item] || 0);
-            if (currentAmount < (amount as number)) {
-                await message.reply(`❌ Bạn thiếu nguyên liệu để nấu món **${recipe.name}**! Gõ \`mstore\` để mua thêm.`);
-                return;
-            }
-        }
+        const row = new ActionRowBuilder<ButtonBuilder>();
+        displayButtons.forEach(itemKey => {
+            row.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`ing_${itemKey}`)
+                    .setLabel(ITEM_NAMES[itemKey] || itemKey)
+                    .setStyle(ButtonStyle.Primary)
+            );
+        });
 
-        // Trừ nguyên liệu
-        for (const [item, amount] of Object.entries(recipe.req)) {
-            if (meats[item] !== undefined && meats[item] >= (amount as number)) meats[item] -= (amount as number);
-            else if (veggies[item] !== undefined && veggies[item] >= (amount as number)) veggies[item] -= (amount as number);
-            else if (spices[item] !== undefined && spices[item] >= (amount as number)) spices[item] -= (amount as number);
-        }
-        fs.writeFileSync(file, JSON.stringify(data, null, 2));
+        let selectedItems: string[] = [];
 
-        // Đếm ngược thời gian
         const cookingEmbed = new EmbedBuilder()
             .setColor('#FEE75C')
-            .setTitle(`🍳 Đang chế biến: ${recipe.name}...`)
-            .setDescription(`⏱️ Thời gian: **${recipe.time / 1000} giây**!\nBấm nút **"Bê Món Ra"** ngay trước khi món ăn bị cháy!`)
-            .setFooter({ text: 'Nhanh tay lên đầu bếp ơi!' });
-
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setCustomId('serve_dish')
-                .setLabel('🍽️ Bê Món Ra')
-                .setStyle(ButtonStyle.Success)
-        );
+            .setTitle(`🍳 Đang chế biến: ${recipe.name}`)
+            .setDescription(
+                `⏱️ Thời gian: **${recipe.time / 1000} giây**!\n` +
+                `🎯 **Hãy chọn đủ các nguyên liệu cần thiết bằng nút bấm bên dưới!**\n\n` +
+                `📥 **Đã chọn:** *(Chưa chọn nguyên liệu nào)*`
+            );
 
         const response = await message.reply({
             embeds: [cookingEmbed],
@@ -175,47 +143,54 @@ export class CookCommand extends Command {
             time: recipe.time
         });
 
-        let served = false;
-
         collector.on('collect', async (interaction) => {
             if (interaction.user.id !== message.author.id) {
                 await interaction.reply({ content: '❌ Đây không phải món ăn của bạn!', ephemeral: true });
                 return;
             }
 
-            served = true;
-            collector.stop();
+            const chosenItem = interaction.customId.replace('ing_', '');
 
-            // Cộng Coins và EXP, hỗ trợ lên cấp (Level Up)
-            let updatedData = JSON.parse(fs.readFileSync(file, 'utf8'));
-            let curPlayer = updatedData[userId];
-            
-            curPlayer.coins = (curPlayer.coins || 0) + recipe.rewardCoins;
-            curPlayer.exp = (curPlayer.exp || 0) + recipe.rewardExp;
-
-            // Cơ chế lên cấp: 100 EXP = 1 Level
-            let levelUpMsg = '';
-            if (curPlayer.exp >= curPlayer.level * 100) {
-                curPlayer.level += 1;
-                levelUpMsg = `\n🎊 **CHÚC MỪNG! Bạn đã thăng cấp lên Level ${curPlayer.level}!** Hãy gõ \`mrecipe\` để xem món mới mở khóa!`;
+            if (!selectedItems.includes(chosenItem)) {
+                selectedItems.push(chosenItem);
             }
 
-            fs.writeFileSync(file, JSON.stringify(updatedData, null, 2));
+            // Kiểm tra xem đã chọn đủ tất cả nguyên liệu đúng chưa
+            const isCompleted = requiredItems.every(item => selectedItems.includes(item));
 
-            const successEmbed = new EmbedBuilder()
-                .setColor('#57F287')
-                .setTitle(`🎉 Chế biến thành công: ${recipe.name}!`)
-                .setDescription(
-                    `Món ăn đã được hoàn thành tuyệt vời!\n` +
-                    `💰 **Nhận được:** \`+${recipe.rewardCoins} Coins\`\n` +
-                    `⭐ **Kinh nghiệm:** \`+${recipe.rewardExp} EXP\`${levelUpMsg}`
+            if (isCompleted) {
+                collector.stop('completed');
+
+                let updatedData = JSON.parse(fs.readFileSync(file, 'utf8'));
+                updatedData[userId].coins = (updatedData[userId].coins || 0) + recipe.rewardCoins;
+                updatedData[userId].exp = (updatedData[userId].exp || 0) + recipe.rewardExp;
+                fs.writeFileSync(file, JSON.stringify(updatedData, null, 2));
+
+                const successEmbed = new EmbedBuilder()
+                    .setColor('#57F287')
+                    .setTitle(`🎉 Hoàn thành món: ${recipe.name}!`)
+                    .setDescription(
+                        `Bạn đã chọn chuẩn xác các nguyên liệu!\n` +
+                        `💰 **Nhận được:** \`+${recipe.rewardCoins} Coins\`\n` +
+                        `⭐ **Kinh nghiệm:** \`+${recipe.rewardExp} EXP\``
+                    );
+
+                await interaction.update({ embeds: [successEmbed], components: [] });
+            } else {
+                // Cập nhật danh sách nguyên liệu đã chọn lên Embed
+                const selectedLabels = selectedItems.map(k => ITEM_NAMES[k]).join(', ');
+                const updatedEmbed = EmbedBuilder.from(cookingEmbed).setDescription(
+                    `⏱️ Thời gian: **${recipe.time / 1000} giây**!\n` +
+                    `🎯 **Hãy chọn đủ các nguyên liệu cần thiết bằng nút bấm bên dưới!**\n\n` +
+                    `📥 **Đã chọn:** ${selectedLabels}`
                 );
 
-            await interaction.update({ embeds: [successEmbed], components: [] });
+                await interaction.update({ embeds: [updatedEmbed] });
+            }
         });
 
-        collector.on('end', async () => {
-            if (!served) {
+        collector.on('end', async (_, reason) => {
+            if (reason !== 'completed') {
                 let updatedData = JSON.parse(fs.readFileSync(file, 'utf8'));
                 const penalty = 100;
                 updatedData[userId].coins = Math.max(0, (updatedData[userId].coins || 0) - penalty);
@@ -224,13 +199,9 @@ export class CookCommand extends Command {
                 const failEmbed = new EmbedBuilder()
                     .setColor('#ED4245')
                     .setTitle(`💥 Món ăn đã bị cháy!`)
-                    .setDescription(`Bạn đã để quá thời gian khi nấu **${recipe.name}**!\n💸 **Hình phạt:** Bị trừ \`${penalty} Coins\` bồi thường nguyên liệu.`);
+                    .setDescription(`Bạn không chọn đủ nguyên liệu kịp thời gian!\n💸 **Bị trừ:** \`${penalty} Coins\`.`);
 
-                const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    row.components.map((button) => ButtonBuilder.from(button).setDisabled(true))
-                );
-
-                await response.edit({ embeds: [failEmbed], components: [disabledRow] }).catch(() => {});
+                await response.edit({ embeds: [failEmbed], components: [] }).catch(() => {});
             }
         });
     }

@@ -32,7 +32,7 @@ export class StoreCommand extends Command {
 
         const userId = message.author.id;
 
-        // 🔄 Tự động khởi tạo hồ sơ nếu người chơi chưa có
+        // 🔄 Tự động khởi tạo hồ sơ nếu người chơi chưa có (đảm bảo đủ các trường inventory và coupons)
         if (!data[userId]) {
             data[userId] = {
                 job: 'Unemployed',
@@ -49,39 +49,50 @@ export class StoreCommand extends Command {
             fs.writeFileSync(file, JSON.stringify(data, null, 2));
         }
 
+        // 🛡️ Đảm bảo player luôn có đủ object inventory và coupons để tránh lỗi undefined
         const player = data[userId];
+        if (!player.inventory) player.inventory = {};
+        if (!player.inventory.meats) player.inventory.meats = { chicken: 0, beef: 0, pork: 0, duck: 0 };
+        if (!player.inventory.veggies) player.inventory.veggies = { cabbage: 0, lettuce: 0, water_spinach: 0, garland_chrysanthemum: 0 };
+        if (!player.inventory.spices) player.inventory.spices = { pepper: 0, chili_sauce: 0, ketchup: 0, fish_sauce: 0 };
+        if (typeof player.inventory.coupons !== 'number') player.inventory.coupons = 0;
 
-        // 📦 Giao diện cửa hàng
+        // 📦 Giao diện cửa hàng tích hợp đầy đủ các gói nguyên liệu
         const storeEmbed = new EmbedBuilder()
             .setColor('#FEE75C')
             .setTitle('🛒 Cửa Hàng "Hết Khô Gà"')
             .setDescription(
                 `Chào mừng **${message.author.username}** đến với cửa hàng nhà hàng! 🐔\n` +
-                `💰 **Số dư hiện tại:** \`${player.coins || 0}\` Coins\n` +
-                `🎟️ **Coupon sở hữu:** \`${player.inventory?.coupons || 0}\` thẻ\n\n` +
-                'Bấm các nút bên dưới để tiến hành mua nguyên liệu bằng Coins hoặc dùng Coupon đổi quà nhé!'
+                `💰 **Số dư hiện tại:** \`${player.coins}\` Coins\n` +
+                `🎟️ **Coupon sở hữu:** \`${player.inventory.coupons}\` thẻ\n\n` +
+                'Bấm các nút bên dưới để tiến hành mua sắm nguyên liệu hoặc dùng Coupon đổi quà nhé!'
             )
             .addFields(
-                { name: '🥩 Gói Thịt Cơ Bản', value: 'Giá: `200 Coins` (Nhận ngẫu nhiên thịt gà/bò/heo)', inline: true },
-                { name: '🥦 Gói Rau Tươi', value: 'Giá: `150 Coins` (Nhận rau củ các loại)', inline: true },
-                { name: '🎟️ Đổi Quà Coupon', value: 'Giá: `1 Coupon` (Nhận phần thưởng đặc biệt)', inline: true }
+                { name: '🥩 Gói Thịt Cơ Bản', value: 'Giá: `200 Coins` (Nhận thêm thịt gà, bò, heo)', inline: true },
+                { name: '🥦 Gói Rau Tươi', value: 'Giá: `150 Coins` (Nhận thêm bắp cải, xà lách)', inline: true },
+                { name: '🧂 Gói Gia Vị', value: 'Giá: `100 Coins` (Nhận thêm tiêu, tương ớt, nước mắm)', inline: true },
+                { name: '🎟️ Đổi Quà Coupon', value: 'Giá: `1 Coupon` (Nhận thưởng 500 Coins)', inline: true }
             )
             .setFooter({ text: 'Hạn tương tác cửa hàng: 60 giây' });
 
-        // 🔘 Tạo các nút mua sắm
+        // 🔘 Tạo các nút mua sắm (chia thành 2 hàng nếu cần hoặc 4 nút trên 1 hàng)
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setCustomId('buy_meat')
-                .setLabel('🥩 Mua Gói Thịt (200c)')
+                .setLabel('🥩 Gói Thịt (200c)')
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setCustomId('buy_veg')
-                .setLabel('🥦 Mua Gói Rau (150c)')
+                .setLabel('🥦 Gói Rau (150c)')
                 .setStyle(ButtonStyle.Success),
             new ButtonBuilder()
+                .setCustomId('buy_spice')
+                .setLabel('🧂 Gói Gia Vị (100c)')
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
                 .setCustomId('use_coupon')
-                .setLabel('🎟️ Dùng Coupon Đổi Quà')
-                .setStyle(ButtonStyle.Secondary)
+                .setLabel('🎟️ Đổi Coupon')
+                .setStyle(ButtonStyle.Danger)
         );
 
         const response = await message.reply({
@@ -106,6 +117,14 @@ export class StoreCommand extends Command {
 
             let updatedData = JSON.parse(fs.readFileSync(file, 'utf8'));
             let currentPlayer = updatedData[userId];
+            
+            // Đảm bảo an toàn dữ liệu đọc từ file cũ
+            if (!currentPlayer.inventory) currentPlayer.inventory = {};
+            if (!currentPlayer.inventory.meats) currentPlayer.inventory.meats = {};
+            if (!currentPlayer.inventory.veggies) currentPlayer.inventory.veggies = {};
+            if (!currentPlayer.inventory.spices) currentPlayer.inventory.spices = {};
+            if (typeof currentPlayer.inventory.coupons !== 'number') currentPlayer.inventory.coupons = 0;
+
             let messageReply = '';
 
             if (interaction.customId === 'buy_meat') {
@@ -129,7 +148,18 @@ export class StoreCommand extends Command {
                 currentPlayer.inventory.veggies.cabbage = (currentPlayer.inventory.veggies.cabbage || 0) + 2;
                 currentPlayer.inventory.veggies.lettuce = (currentPlayer.inventory.veggies.lettuce || 0) + 2;
                 messageReply = '🎉 Bạn đã mua thành công **1 Gói Rau Tươi** (-150 Coins)!';
-            } 
+            }
+            else if (interaction.customId === 'buy_spice') {
+                const cost = 100;
+                if ((currentPlayer.coins || 0) < cost) {
+                    await interaction.reply({ content: '❌ Bạn không đủ `100 Coins` để mua gói gia vị này!', ephemeral: true });
+                    return;
+                }
+                currentPlayer.coins -= cost;
+                currentPlayer.inventory.spices.pepper = (currentPlayer.inventory.spices.pepper || 0) + 2;
+                currentPlayer.inventory.spices.chili_sauce = (currentPlayer.inventory.spices.chili_sauce || 0) + 1;
+                messageReply = '🎉 Bạn đã mua thành công **1 Gói Gia Vị** (-100 Coins)!';
+            }
             else if (interaction.customId === 'use_coupon') {
                 const coupons = currentPlayer.inventory.coupons || 0;
                 if (coupons <= 0) {
@@ -137,7 +167,7 @@ export class StoreCommand extends Command {
                     return;
                 }
                 currentPlayer.inventory.coupons -= 1;
-                currentPlayer.coins += 500; // Thưởng nóng 500 xu khi dùng coupon
+                currentPlayer.coins += 500; 
                 messageReply = '🎁 Bạn đã dùng **1 Coupon** và nhận được phần thưởng **500 Coins** vào ví!';
             }
 

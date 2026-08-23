@@ -1,19 +1,13 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import {
-	ActionRowBuilder,
-	ButtonBuilder,
-	ButtonStyle,
-	EmbedBuilder,
-	Message
-} from 'discord.js';
-
+import { EmbedBuilder, Message } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
 
 @ApplyOptions<Command.Options>({
 	name: 'profile',
-	description: 'View chef profile, job, and ingredient inventory.'
+	aliases: ['p', 'me', 'mprofile'],
+	description: 'Display player profile and job details at "Hết Khô Gà" Restaurant.'
 })
 export class ProfileCommand extends Command {
 	public override async messageRun(message: Message) {
@@ -25,7 +19,6 @@ export class ProfileCommand extends Command {
 		}
 
 		let data: Record<string, any> = {};
-
 		try {
 			const raw = fs.readFileSync(file, 'utf8').trim();
 			data = raw ? JSON.parse(raw) : {};
@@ -33,97 +26,66 @@ export class ProfileCommand extends Command {
 			data = {};
 		}
 
-		const targetUser = message.mentions.users.first() ?? message.author;
-		const userId = targetUser.id;
+		const userId = message.author.id;
 
-		const member = message.guild?.members.cache.get(userId);
-		const isCuttingBoard = member?.roles.cache.some((role) =>
-			role.name.includes('Cái thớt')
-		);
-
+		// Khởi tạo dữ liệu người chơi mới nếu chưa có
 		if (!data[userId]) {
 			data[userId] = {
 				job: 'Unemployed',
 				level: 1,
 				exp: 0,
 				dishesCooked: 0,
-				inventory: { meat: 5, veggie: 5, spice: 5 }
+				tablesServed: 0,
+				guestsWelcomed: 0,
+				inventory: { meat: 5, veggie: 5, spice: 5 },
+				lastJobChange: 0
 			};
-
 			fs.writeFileSync(file, JSON.stringify(data, null, 2));
 		}
 
 		const player = data[userId];
 
-		player.job ??= 'Unemployed';
-		player.level ??= 1;
-		player.exp ??= 0;
-		player.dishesCooked ??= 0;
-		player.inventory ??= { meat: 5, veggie: 5, spice: 5 };
+		// Xử lý thông tin hiển thị riêng cho từng Job
+		let jobTitle = '❌ Chưa có việc làm (Unemployed)';
+		let jobDetailsField = { name: '', value: '' };
 
-		const jobDisplayNames: Record<string, string> = {
-			waiter: '🍵 Waiter (Bồi Bàn)',
-			chef: '🍳 Chef (Đầu Bếp)',
-			receptionist: '📋 Receptionist (Lễ Tân)',
-			Unemployed: '❓ Unemployed (Chưa có việc)'
-		};
-
-		let chefTitle = '🧑‍🍳 Apprentice Chef';
-		if (isCuttingBoard) {
-			chefTitle = '👽 Supreme Judge "Cutting Board"';
-		} else if (player.level >= 50) {
-			chefTitle = '👑 Legendary Head Chef';
-		} else if (player.level >= 30) {
-			chefTitle = '🌟 Executive Chef';
-		} else if (player.level >= 10) {
-			chefTitle = '🍳 Sous Chef';
+		if (player.job === 'chef') {
+			jobTitle = '🍳 Chef (Đầu Bếp)';
+			jobDetailsField = {
+				name: '📦 Thông Tin Đầu Bếp',
+				value: `🥩 **Thịt:** ${player.inventory?.meat || 0}\n🥦 **Rau:** ${player.inventory?.veggie || 0}\n🧂 **Gia vị:** ${player.inventory?.spice || 0}\n🍲 **Món đã nấu:** ${player.dishesCooked || 0}\n\n💡 *Lệnh công việc:* \`mcook\``
+			};
+		} else if (player.job === 'waiter') {
+			jobTitle = '🍵 Waiter (Bồi Bàn)';
+			jobDetailsField = {
+				name: '🧹 Thông Tin Bồi Bàn',
+				value: `🧽 **Bàn đã phục vụ:** ${player.tablesServed || 0}\n\n💡 *Lệnh công việc:* \`mserve\``
+			};
+		} else if (player.job === 'receptionist') {
+			jobTitle = '📋 Receptionist (Lễ Tân)';
+			jobDetailsField = {
+				name: '👥 Thông Tin Lễ Tân',
+				value: `🛎️ **Khách đã tiếp đón:** ${player.guestsWelcomed || 0}\n\n💡 *Lệnh công việc:* \`mwork\``
+			};
+		} else {
+			jobDetailsField = {
+				name: '📢 Hướng Dẫn',
+				value: 'Dùng lệnh `mjob` để chọn vị trí làm việc tại nhà hàng "Hết Khô Gà" 🐔❌!'
+			};
 		}
 
 		const embed = new EmbedBuilder()
-			.setColor('#FF9900')
-			.setTitle(`🍳 Kitchen Profile: ${targetUser.username}`)
-			.setThumbnail(targetUser.displayAvatarURL({ size: 256 }))
+			.setColor('#5865F2')
+			.setTitle(`📜 Hồ Sơ Nhân Viên - ${message.author.username}`)
+			.setThumbnail(message.author.displayAvatarURL({ forceStatic: false }))
 			.addFields(
-				{
-					name: '🎖️ Chef Title',
-					value: chefTitle,
-					inline: true
-				},
-				{
-					name: '💼 Current Job',
-					value: jobDisplayNames[player.job] || player.job,
-					inline: true
-				},
-				{
-					name: '⭐ Level',
-					value: `Level ${player.level} (${player.exp}/100 EXP)`,
-					inline: true
-				},
-				{
-					name: '🍲 Dishes Cooked',
-					value: `${player.dishesCooked} dishes`,
-					inline: true
-				},
-				{
-					name: '🧺 Ingredient Inventory',
-					value: `🥩 **Meat:** ${player.inventory.meat}\n🥦 **Veggies:** ${player.inventory.veggie}\n🧂 **Spices:** ${player.inventory.spice}`,
-					inline: false
-				}
+				{ name: '💼 Vị Trí', value: jobTitle, inline: true },
+				{ name: '⭐ Cấp Độ', value: `Level ${player.level || 1} (${player.exp || 0} EXP)`, inline: true },
+				jobDetailsField
 			)
-			.setFooter({ text: 'Type mcook to start cooking!' })
+			.setFooter({ text: 'Nhà hàng "Hết Khô Gà" 🐔❌ - Cùng nhau phát triển!' })
 			.setTimestamp();
 
-		const cookButton = new ButtonBuilder()
-			.setCustomId(`profile_cook_${userId}`)
-			.setLabel('Start Cooking')
-			.setEmoji('🍳')
-			.setStyle(ButtonStyle.Success);
-
-		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(cookButton);
-
-		await message.reply({
-			embeds: [embed],
-			components: [row]
-		});
+		await message.reply({ embeds: [embed] });
 	}
 }

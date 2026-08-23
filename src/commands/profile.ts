@@ -30,15 +30,32 @@ export class ProfileCommand extends Command {
             }
         }
 
-        // 🎯 Lấy người dùng được tag, nếu không tag ai thì lấy chính người gõ lệnh
+        // 🎯 Lấy người dùng được tag, nếu không tag ai thì lấy người gõ lệnh
         const targetUser = message.mentions.users.first() || message.author;
         const userId = targetUser.id;
-        const player = data[userId];
 
-        if (!player) {
-            await message.reply(`❌ **${targetUser.username}** chưa đăng ký làm việc! Hãy gõ lệnh \`mjob\` để chọn nghề trước nhé.`);
-            return;
+        // 🔄 Nếu người được tag chưa có trong file, tự động khởi tạo hồ sơ mặc định
+        if (!data[userId]) {
+            data[userId] = {
+                job: 'Unemployed',
+                level: 1,
+                exp: 0,
+                coins: 1000,
+                dishesCooked: 0,
+                tablesServed: 0,
+                guestsWelcomed: 0,
+                lastJobChange: 0,
+                inventory: {
+                    meats: { chicken: 5, beef: 2, pork: 3, duck: 0 },
+                    veggies: { cabbage: 5, lettuce: 5, water_spinach: 3, garland_chrysanthemum: 0 },
+                    spices: { pepper: 5, chili_sauce: 5, ketchup: 5, fish_sauce: 5 },
+                    coupons: 0
+                }
+            };
+            fs.writeFileSync(file, JSON.stringify(data, null, 2));
         }
+
+        const player = data[userId];
 
         const inventory = player.inventory || {};
         const meats = inventory.meats || {};
@@ -46,6 +63,7 @@ export class ProfileCommand extends Command {
         const spices = inventory.spices || {};
         const coupons = inventory.coupons || 0;
 
+        // Hàm hỗ trợ tạo Embed hiển thị theo tab kho 📦
         const createProfileEmbed = (category: 'meats' | 'veggies' | 'spices') => {
             const embed = new EmbedBuilder()
                 .setColor('#5865F2')
@@ -91,6 +109,7 @@ export class ProfileCommand extends Command {
             return embed;
         };
 
+        // Tạo 3 nút bấm phân loại kho hàng 🔘
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setCustomId('tab_meats')
@@ -111,6 +130,7 @@ export class ProfileCommand extends Command {
             components: [row]
         });
 
+        // Tạo Collector lắng nghe chuyển tab ⏱️
         const collector = response.createMessageComponentCollector({
             componentType: ComponentType.Button,
             time: 60000

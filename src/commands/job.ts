@@ -1,3 +1,4 @@
+
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { 
@@ -46,7 +47,7 @@ export class JobCommand extends Command {
         const embed = new EmbedBuilder()
             .setColor('#FEE75C')
             .setTitle('🏪 "Hết Khô Gà" Restaurant Recruitment')
-            .setDescription('Welcome to **"Hết Khô Gà" Restaurant**! 🐔❌\nChoose your position below to start working:\n\n🍵 **Waiter (Bồi Bàn)**: Serve customers and clean tables.\n🍳 **Chef (Đầu Bếp)**: Cook delicious meals.\n📋 **Receptionist (Lễ Tân)**: Welcome guests.')
+            .setDescription('Welcome to **"Hết Khô Gà" Restaurant**! 🐔❌\nChoose your position below to start working:\n\n🍵 **Waiter (Bồi Bàn)**: Serve customers and clean tables.\n🍳 **Chef (Đầu Bếp)**: Cook delicious meals. *(Nhận 1 Coupon mua nguyên liệu Free! 🎟️)*\n📋 **Receptionist (Lễ Tân)**: Welcome guests.')
             .setFooter({ text: 'Click a button below to select your job!' });
 
         const response = await message.reply({
@@ -54,14 +55,12 @@ export class JobCommand extends Command {
             components: [row]
         });
 
-        // Lắng nghe sự kiện bấm nút ⏱️
         const collector = response.createMessageComponentCollector({
             componentType: ComponentType.Button,
             time: 60000
         });
 
         collector.on('collect', async (interaction) => {
-            // Chỉ cho phép người gõ lệnh tương tác 🙅‍♂️
             if (interaction.user.id !== message.author.id) {
                 await interaction.reply({ 
                     content: '❌ Bạn không phải là người gọi menu này!', 
@@ -70,7 +69,6 @@ export class JobCommand extends Command {
                 return;
             }
 
-            // Đọc lại dữ liệu mới nhất từ file JSON 📂
             let currentData: Record<string, any> = {};
             try {
                 const raw = fs.readFileSync(file, 'utf8').trim();
@@ -81,7 +79,6 @@ export class JobCommand extends Command {
 
             const playerData = currentData[userId] || {};
 
-            // Kiểm tra nếu đã có Job 🔒
             if (playerData.job && playerData.job !== 'Unemployed') {
                 await interaction.reply({
                     content: `⏳ **Bạn đang trong hợp đồng làm việc!** Chức vụ hiện tại: **${playerData.job.toUpperCase()}**.`,
@@ -90,22 +87,35 @@ export class JobCommand extends Command {
                 return;
             }
 
-            // Lưu Job mới 💾
             const selectedJob = interaction.customId;
+            const inventory = playerData.inventory || {
+                meats: { chicken: 5, beef: 2, pork: 3, duck: 0 },
+                veggies: { cabbage: 5, lettuce: 5, water_spinach: 3, garland_chrysanthemum: 0 },
+                spices: { pepper: 5, chili_sauce: 5, ketchup: 5, fish_sauce: 5 },
+                coupons: 0
+            };
+
+            // Nếu nhận việc Đầu bếp (Chef), tặng 1 Coupon mua sắm free 🎟️
+            let extraMessage = '';
+            if (selectedJob === 'chef') {
+                inventory.coupons = (inventory.coupons || 0) + 1;
+                extraMessage = '\n🎟️ **Tân thủ quà tặng:** Bạn đã nhận được **1 Coupon mua hàng FREE**!';
+            }
+
             currentData[userId] = {
                 ...playerData,
                 job: selectedJob,
-                lastJobChange: Date.now()
+                lastJobChange: Date.now(),
+                inventory: inventory
             };
             fs.writeFileSync(file, JSON.stringify(currentData, null, 2));
 
-            // Vô hiệu hóa tất cả các nút bấm 🛑
             const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
                 row.components.map((button: ButtonBuilder) => ButtonBuilder.from(button).setDisabled(true))
             );
 
             await interaction.update({
-                content: `🎉 **Chúc mừng!** Bạn đã nhận vị trí **${selectedJob.toUpperCase()}** tại nhà hàng "Hết Khô Gà"!`,
+                content: `🎉 **Chúc mừng!** Bạn đã nhận vị trí **${selectedJob.toUpperCase()}** tại nhà hàng "Hết Khô Gà"!${extraMessage}`,
                 components: [disabledRow]
             });
         });

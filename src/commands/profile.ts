@@ -34,7 +34,7 @@ export class ProfileCommand extends Command {
         const targetUser = message.mentions.users.first() || message.author;
         const userId = targetUser.id;
 
-        // 🔄 Nếu người được tag chưa có trong file, tự động khởi tạo hồ sơ mặc định
+        // 🔄 Nếu người được tag chưa có trong file, tự động khởi tạo hồ sơ mặc định (Thất nghiệp)
         if (!data[userId]) {
             data[userId] = {
                 job: 'Unemployed',
@@ -56,21 +56,34 @@ export class ProfileCommand extends Command {
         }
 
         const player = data[userId];
+        const isUnemployed = !player.job || player.job.toLowerCase() === 'unemployed';
 
+        // 🛑 TRƯỜNG HỢP THẤT NGHIỆP: Chỉ hiển thị thông báo ngắn gọn
+        if (isUnemployed) {
+            const unemployedEmbed = new EmbedBuilder()
+                .setColor('#ED4245')
+                .setTitle(`👤 Hồ Sơ Nhân Viên - ${targetUser.username}`)
+                .setThumbnail(targetUser.displayAvatarURL())
+                .setDescription('❌ **Bạn đang thất nghiệp!** Hãy gõ lệnh `mjob` để kiếm việc làm tại nhà hàng ngay nhé. 🐔');
+
+            await message.reply({ embeds: [unemployedEmbed] });
+            return;
+        }
+
+        // 💼 TRƯỜNG HỢP ĐÃ CÓ NGHỀ: Hiển thị đầy đủ thông tin và kho hàng
         const inventory = player.inventory || {};
         const meats = inventory.meats || {};
         const veggies = inventory.veggies || {};
         const spices = inventory.spices || {};
         const coupons = inventory.coupons || 0;
 
-        // Hàm hỗ trợ tạo Embed hiển thị theo tab kho 📦
         const createProfileEmbed = (category: 'meats' | 'veggies' | 'spices') => {
             const embed = new EmbedBuilder()
                 .setColor('#5865F2')
                 .setTitle(`👤 Hồ Sơ Nhân Viên - ${targetUser.username}`)
                 .setThumbnail(targetUser.displayAvatarURL())
                 .addFields(
-                    { name: '💼 Chức vụ', value: `\`${(player.job || 'Unemployed').toUpperCase()}\``, inline: true },
+                    { name: '💼 Chức vụ', value: `\`${player.job.toUpperCase()}\``, inline: true },
                     { name: '⭐ Cấp độ (Level)', value: `\`LV.${player.level || 1}\` (${player.exp || 0} EXP)`, inline: true },
                     { name: '💰 Ví tiền', value: `\`${player.coins || 0}\` Coins`, inline: true },
                     { name: '🎟️ Coupon Free', value: `\`${coupons}\` thẻ`, inline: true }
@@ -109,7 +122,6 @@ export class ProfileCommand extends Command {
             return embed;
         };
 
-        // Tạo 3 nút bấm phân loại kho hàng 🔘
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setCustomId('tab_meats')
@@ -130,14 +142,13 @@ export class ProfileCommand extends Command {
             components: [row]
         });
 
-        // Tạo Collector lắng nghe chuyển tab ⏱️
         const collector = response.createMessageComponentCollector({
             componentType: ComponentType.Button,
             time: 60000
         });
 
         collector.on('collect', async (interaction) => {
-            // 🛡️ CHỈ CHÍNH CHỦ (người được soi profile) mới được quyền bấm nút chuyển tab
+            // 🛡️ CHỈ CHÍNH CHỦ mới được quyền bấm nút chuyển tab
             if (interaction.user.id !== targetUser.id) {
                 await interaction.reply({ 
                     content: '❌ Đây không phải là bảng hồ sơ của bạn!', 

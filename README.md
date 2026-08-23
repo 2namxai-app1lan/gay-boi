@@ -4,7 +4,7 @@
 
 ## Cách dùng
 
-### Các câu lệnh (bao gồm đang có và project chưa xong) 
+### 1) Các câu lệnh (bao gồm đang có và project chưa xong) 
 
 ```Mjob```
 

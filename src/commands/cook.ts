@@ -1,5 +1,5 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { Command } from '@sapphire/framework';
+import { Command, Args } from '@sapphire/framework';
 import { 
     ActionRowBuilder, 
     ButtonBuilder, 
@@ -42,7 +42,7 @@ const RECIPES: Record<string, any> = {
     description: 'Nấu ăn phục vụ thực khách.'
 })
 export class CookCommand extends Command {
-    public override async messageRun(message: Message, args: Command.Args) {
+    public override async messageRun(message: Message, args: Args) {
         const file = path.join(process.cwd(), 'src', 'data', 'players.json');
 
         let data: Record<string, any> = {};
@@ -98,7 +98,7 @@ export class CookCommand extends Command {
             return;
         }
 
-        // 🌟 2. XỬ LÝ LỆNH NẤU ÁN
+        // 🌟 2. XỬ LÝ LỆNH NẤU ĂN
         const recipeKey = (await args.rest('string').catch(() => '')).toLowerCase().trim();
         const recipe = RECIPES[recipeKey];
 

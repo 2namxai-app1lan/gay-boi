@@ -1,6 +1,6 @@
 # Bot Mayo đến từ bếp 💥
 
-đây là bot thử nghiệm xài [sapphire framework][sapphire] được viết trong typeScript
+đây là bot thử nghiệm xài `sapphire framework` được viết trong typeScript
 
 ## Cách dùng
 

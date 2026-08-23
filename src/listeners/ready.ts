@@ -16,13 +16,13 @@ export class ReadyListener extends Listener {
 
         // 📝 Danh sách các câu trạng thái độc lạ
         const statusList = [
-            { name: 'Thiếu bã mía là mất khô gà 🐔', type: ActivityType.Playing },
+            { name: 'Thiếu bã mía là mất khô gà ', type: ActivityType.Playing },
             { name: ':3c', type: ActivityType.Playing },
-            { name: 'Anh độ mixue 🍦', type: ActivityType.Playing },
-            { name: '"Im gay" - Tiến gay 🌈', type: ActivityType.Playing },
-            { name: 'giao hưởng thank độ, vui lòng không làm phiền 🎧', type: ActivityType.Listening },
+            { name: 'Anh độ mixue ', type: ActivityType.Playing },
+            { name: '"Im gay" - Tiến gay ', type: ActivityType.Playing },
+            { name: 'đang nghe giao hưởng thank độ, vui lòng không làm phiền ', type: ActivityType.Listening },
             { name: 'mhelp để biết các câu lệnh 📜', type: ActivityType.Playing },
-            { name: '"Tao táng mày sang Campuchia đấy" - Tôm không gay 🥊', type: ActivityType.Playing }
+            { name: '"Tao tán mày 1 phát sang Campuchia đấy" - Tôm không gay ', type: ActivityType.Playing }
         ];
 
         let currentIndex = 0;
@@ -39,7 +39,7 @@ export class ReadyListener extends Listener {
         // Kích hoạt ngay lập tức khi bot online
         updateStatus();
 
-        // ⏱️ Cứ mỗi 10 giây (10000 ms) sẽ tự động đổi câu một lần
+        // ⏱️ Cứ mỗi 30 giây (30000 ms) sẽ tự động đổi câu một lần
         setInterval(updateStatus, 10000);
 
         this.container.logger.info(`🤖 Bot ${client.user.tag} đã sẵn sàng hoạt động với trạng thái xoay vần!`);

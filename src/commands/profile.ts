@@ -56,7 +56,8 @@ export class ProfileCommand extends Command {
         }
 
         const player = data[userId];
-        const isUnemployed = !player.job || player.job.toLowerCase() === 'unemployed';
+        const jobName = (player.job || 'Unemployed').toLowerCase();
+        const isUnemployed = jobName === 'unemployed';
 
         // 🛑 TRƯỜNG HỢP THẤT NGHIỆP: Chỉ hiển thị thông báo ngắn gọn
         if (isUnemployed) {
@@ -70,14 +71,11 @@ export class ProfileCommand extends Command {
             return;
         }
 
-        // 💼 TRƯỜNG HỢP ĐÃ CÓ NGHỀ: Hiển thị đầy đủ thông tin và kho hàng
         const inventory = player.inventory || {};
-        const meats = inventory.meats || {};
-        const veggies = inventory.veggies || {};
-        const spices = inventory.spices || {};
         const coupons = inventory.coupons || 0;
 
-        const createProfileEmbed = (category: 'meats' | 'veggies' | 'spices') => {
+        // 🛠️ HÀM TẠO EMBED DỰA TRÊN TỪNG NGHỀ VÀ SUB-TAB
+        const createJobProfileEmbed = (subTab: string) => {
             const embed = new EmbedBuilder()
                 .setColor('#5865F2')
                 .setTitle(`👤 Hồ Sơ Nhân Viên - ${targetUser.username}`)
@@ -89,59 +87,84 @@ export class ProfileCommand extends Command {
                     { name: '🎟️ Coupon Free', value: `\`${coupons}\` thẻ`, inline: true }
                 );
 
-            if (category === 'meats') {
-                embed.addFields({
-                    name: '🥩 Kho Thịt (Meats)',
-                    value: `🐔 **Gà (Chicken):** \`${meats.chicken || 0}\`
-🥩 **Bò (Beef):** \`${meats.beef || 0}\`
-🐖 **Heo (Pork):** \`${meats.pork || 0}\`
-🦆 **Vịt (Duck):** \`${meats.duck || 0}\``,
-                    inline: false
-                });
-            } else if (category === 'veggies') {
-                embed.addFields({
-                    name: '🥦 Kho Rau (Veggies)',
-                    value: `🥬 **Bắp cải (Cabbage):** \`${veggies.cabbage || 0}\`
-🥗 **Xà lách (Lettuce):** \`${veggies.lettuce || 0}\`
-🌱 **Rau muống (Water Spinach):** \`${veggies.water_spinach || 0}\`
-🌿 **Tần ô (Garland Chrysanthemum):** \`${veggies.garland_chrysanthemum || 0}\``,
-                    inline: false
-                });
-            } else if (category === 'spices') {
-                embed.addFields({
-                    name: '🧂 Kho Gia Vị (Spices)',
-                    value: `🌶️ **Tiêu (Pepper):** \`${spices.pepper || 0}\`
-🌶️ **Tương ớt (Chili Sauce):** \`${spices.chili_sauce || 0}\`
-🍅 **Tương cà (Ketchup):** \`${spices.ketchup || 0}\`
-🐟 **Nước mắm (Fish Sauce):** \`${spices.fish_sauce || 0}\``,
-                    inline: false
-                });
+            // Phân loại nội dung hiển thị theo nghề nghiệp
+            if (jobName === 'chef') {
+                const meats = inventory.meats || {};
+                const veggies = inventory.veggies || {};
+                const spices = inventory.spices || {};
+
+                if (subTab === 'chef_meats') {
+                    embed.addFields({
+                        name: '🥩 Kho Thịt (Meats)',
+                        value: `🐔 **Gà (Chicken):** \`${meats.chicken || 0}\`\n🥩 **Bò (Beef):** \`${meats.beef || 0}\`\n🐖 **Heo (Pork):** \`${meats.pork || 0}\`\n🦆 **Vịt (Duck):** \`${meats.duck || 0}\``,
+                        inline: false
+                    });
+                } else if (subTab === 'chef_veggies') {
+                    embed.addFields({
+                        name: '🥦 Kho Rau (Veggies)',
+                        value: `🥬 **Bắp cải (Cabbage):** \`${veggies.cabbage || 0}\`\n🥗 **Xà lách (Lettuce):** \`${veggies.lettuce || 0}\`\n🌱 **Rau muống:** \`${veggies.water_spinach || 0}\`\n🌿 **Tần ô:** \`${veggies.garland_chrysanthemum || 0}\``,
+                        inline: false
+                    });
+                } else {
+                    embed.addFields({
+                        name: '🧂 Kho Gia Vị (Spices)',
+                        value: `🌶️ **Tiêu:** \`${spices.pepper || 0}\`\n🌶️ **Tương ớt:** \`${spices.chili_sauce || 0}\`\n🍅 **Tương cà:** \`${spices.ketchup || 0}\`\n🐟 **Nước mắm:** \`${spices.fish_sauce || 0}\``,
+                        inline: false
+                    });
+                }
+            } else if (jobName === 'waiter') {
+                if (subTab === 'waiter_tables') {
+                    embed.addFields({ name: '🪑 Bàn Đang Phục Vụ', value: 'Trạng thái: Đang chuẩn bị phục vụ khách.\n• Bàn 1: Trống\n• Bàn 2: Đang dùng bữa', inline: false });
+                } else if (subTab === 'waiter_orders') {
+                    embed.addFields({ name: '🍲 Món Chờ Mang Ra', value: '• Đang có `0` món ăn chờ phục vụ khách.', inline: false });
+                } else {
+                    embed.addFields({ name: '🪙 Tiền Típ Thu Được', value: `Tổng tiền típ tích lũy: \`${player.tablesServed || 0}\` Coins`, inline: false });
+                }
+            } else if (jobName === 'receptionist') {
+                if (subTab === 'recept_lobby') {
+                    embed.addFields({ name: '🛋️ Khách Chờ Ở Sảnh', value: 'Số lượng khách đang đợi xếp bàn: `3` nhóm.', inline: false });
+                } else if (subTab === 'recept_vip') {
+                    embed.addFields({ name: '⭐ Đặt Bàn VIP', value: 'Danh sách bàn VIP đặt trước: Không có.', inline: false });
+                } else {
+                    embed.addFields({ name: '📖 Sổ Tay Đón Khách', value: `Tổng số khách đã chào đón: \`${player.guestsWelcomed || 0}\` lượt.`, inline: false });
+                }
             }
 
-            embed.setFooter({ text: 'Bấm nút bên dưới để chuyển kho hàng | Hạn tương tác: 60s' });
+            embed.setFooter({ text: 'Bấm nút bên dưới để chuyển tab chức năng | Hạn tương tác: 60s' });
             return embed;
         };
 
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setCustomId('tab_meats')
-                .setLabel('🥩 Kho Thịt')
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId('tab_veggies')
-                .setLabel('🥦 Kho Rau')
-                .setStyle(ButtonStyle.Success),
-            new ButtonBuilder()
-                .setCustomId('tab_spices')
-                .setLabel('🧂 Kho Gia Vị')
-                .setStyle(ButtonStyle.Secondary)
-        );
+        // 🔘 TẠO 3 NÚT BẤM ĐỘC LẬP TÙY THEO NGHỀ
+        let row = new ActionRowBuilder<ButtonBuilder>();
+
+        if (jobName === 'chef') {
+            row.addComponents(
+                new ButtonBuilder().setCustomId('chef_meats').setLabel('🥩 Kho Thịt').setStyle(ButtonStyle.Primary),
+                new ButtonBuilder().setCustomId('chef_veggies').setLabel('🥦 Kho Rau').setStyle(ButtonStyle.Success),
+                new ButtonBuilder().setCustomId('chef_spices').setLabel('🧂 Kho Gia Vị').setStyle(ButtonStyle.Secondary)
+            );
+        } else if (jobName === 'waiter') {
+            row.addComponents(
+                new ButtonBuilder().setCustomId('waiter_tables').setLabel('🪑 Bàn Phục Vụ').setStyle(ButtonStyle.Primary),
+                new ButtonBuilder().setCustomId('waiter_orders').setLabel('🍲 Món Chờ').setStyle(ButtonStyle.Success),
+                new ButtonBuilder().setCustomId('waiter_tips').setLabel('🪙 Tiền Típ').setStyle(ButtonStyle.Secondary)
+            );
+        } else if (jobName === 'receptionist') {
+            row.addComponents(
+                new ButtonBuilder().setCustomId('recept_lobby').setLabel('🛋️ Khách Chờ Sảnh').setStyle(ButtonStyle.Primary),
+                new ButtonBuilder().setCustomId('recept_vip').setLabel('⭐ Đặt Bàn VIP').setStyle(ButtonStyle.Success),
+                new ButtonBuilder().setCustomId('recept_notes').setLabel('📖 Sổ Đón Khách').setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        const initialTab = jobName === 'chef' ? 'chef_meats' : jobName === 'waiter' ? 'waiter_tables' : 'recept_lobby';
 
         const response = await message.reply({
-            embeds: [createProfileEmbed('meats')],
+            embeds: [createJobProfileEmbed(initialTab)],
             components: [row]
         });
 
+        // ⏱️ COLLECTOR LẮNG NGHE TƯƠNG TÁC NÚT
         const collector = response.createMessageComponentCollector({
             componentType: ComponentType.Button,
             time: 60000
@@ -157,12 +180,8 @@ export class ProfileCommand extends Command {
                 return;
             }
 
-            let selectedCategory: 'meats' | 'veggies' | 'spices' = 'meats';
-            if (interaction.customId === 'tab_veggies') selectedCategory = 'veggies';
-            if (interaction.customId === 'tab_spices') selectedCategory = 'spices';
-
             await interaction.update({
-                embeds: [createProfileEmbed(selectedCategory)],
+                embeds: [createJobProfileEmbed(interaction.customId)],
                 components: [row]
             });
         });

@@ -1,4 +1,3 @@
-
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { EmbedBuilder, Message } from 'discord.js';
@@ -27,11 +26,9 @@ export class ProfileCommand extends Command {
 			data = {};
 		}
 
-		// FIX LỖI MENTION: Lấy người dùng được tag, nếu không tag ai thì lấy người gõ lệnh
 		const targetUser = message.mentions.users.first() || message.author;
 		const userId = targetUser.id;
 
-		// Kiểm tra nếu người dùng target chưa có trong database
 		if (!data[userId]) {
 			data[userId] = {
 				job: 'Unemployed',
@@ -53,17 +50,19 @@ export class ProfileCommand extends Command {
 
 		const player = data[userId];
 
-		// Xử lý thông tin hiển thị riêng cho từng Job
 		let jobTitle = '❌ Chưa có việc làm (Unemployed)';
 		let jobDetailsField = { name: '', value: '' };
 
 		if (player.job === 'chef') {
 			jobTitle = '🍳 Chef (Đầu Bếp)';
 			
-			// Đếm tổng nguyên liệu trong kho mở rộng
-			const totalMeat = Object.values(player.inventory?.meats || {}).reduce((a: any, b: any) => a + b, 0);
-			const totalVeggie = Object.values(player.inventory?.veggies || {}).reduce((a: any, b: any) => a + b, 0);
-			const totalSpice = Object.values(player.inventory?.spices || {}).reduce((a: any, b: any) => a + b, 0);
+			const meats = player.inventory?.meats || {};
+			const veggies = player.inventory?.veggies || {};
+			const spices = player.inventory?.spices || {};
+
+			const totalMeat = Object.values(meats).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
+			const totalVeggie = Object.values(veggies).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
+			const totalSpice = Object.values(spices).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
 
 			jobDetailsField = {
 				name: '📦 Thông Tin Đầu Bếp',

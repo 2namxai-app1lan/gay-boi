@@ -40,7 +40,7 @@ export class ReadyListener extends Listener {
         updateStatus();
 
         // ⏱️ Cứ mỗi 30 giây (30000 ms) sẽ tự động đổi câu một lần
-        setInterval(updateStatus, 10000);
+        setInterval(updateStatus, 30000);
 
         this.container.logger.info(`🤖 Bot ${client.user.tag} đã sẵn sàng hoạt động với trạng thái xoay vần!`);
     }

@@ -1,4 +1,3 @@
-
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { 
@@ -28,7 +27,6 @@ export class JobCommand extends Command {
 
         const userId = message.author.id;
 
-        // Tạo nút bấm chọn công việc 🔘
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setCustomId('waiter')
@@ -47,7 +45,13 @@ export class JobCommand extends Command {
         const embed = new EmbedBuilder()
             .setColor('#FEE75C')
             .setTitle('🏪 "Hết Khô Gà" Restaurant Recruitment')
-            .setDescription('Welcome to **"Hết Khô Gà" Restaurant**! 🐔❌\nChoose your position below to start working:\n\n🍵 **Waiter (Bồi Bàn)**: Serve customers and clean tables.\n🍳 **Chef (Đầu Bếp)**: Cook delicious meals. *(Nhận 1 Coupon mua nguyên liệu Free! 🎟️)*\n📋 **Receptionist (Lễ Tân)**: Welcome guests.')
+            .setDescription(
+                'Welcome to **"Hết Khô Gà" Restaurant**! 🐔❌\n' +
+                'Choose your position below to start working:\n\n' +
+                '🍵 **Waiter (Bồi Bàn)**: Serving customers & table cleanup.\n' +
+                '🍳 **Chef (Đầu Bếp)**: Cooking delicious meals.\n' +
+                '📋 **Receptionist (Lễ Tân)**: Welcoming and helping guests.'
+            )
             .setFooter({ text: 'Click a button below to select your job!' });
 
         const response = await message.reply({
@@ -95,12 +99,9 @@ export class JobCommand extends Command {
                 coupons: 0
             };
 
-            // Nếu nhận việc Đầu bếp (Chef), tặng 1 Coupon mua sắm free 🎟️
-            let extraMessage = '';
-            if (selectedJob === 'chef') {
-                inventory.coupons = (inventory.coupons || 0) + 1;
-                extraMessage = '\n🎟️ **Tân thủ quà tặng:** Bạn đã nhận được **1 Coupon mua hàng FREE**!';
-            }
+            // 🎁 Tặng 1 Coupon tân thủ cho mọi công việc được chọn
+            inventory.coupons = (inventory.coupons || 0) + 1;
+            const extraMessage = '\n🎟️ **Tân thủ quà tặng:** Bạn đã nhận được **1 Coupon mua hàng FREE**!';
 
             currentData[userId] = {
                 ...playerData,

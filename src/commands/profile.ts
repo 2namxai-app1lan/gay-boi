@@ -137,10 +137,10 @@ export class ProfileCommand extends Command {
         });
 
         collector.on('collect', async (interaction) => {
-            // 🛡️ Chỉ người gõ lệnh mới được phép bấm nút chuyển tab
-            if (interaction.user.id !== message.author.id) {
+            // 🛡️ CHỈ CHÍNH CHỦ (người được soi profile) mới được quyền bấm nút chuyển tab
+            if (interaction.user.id !== targetUser.id) {
                 await interaction.reply({ 
-                    content: '❌ Bạn không phải là người gọi menu này!', 
+                    content: '❌ Đây không phải là bảng hồ sơ của bạn!', 
                     ephemeral: true 
                 });
                 return;

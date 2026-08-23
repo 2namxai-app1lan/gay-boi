@@ -30,7 +30,7 @@ export class ProfileCommand extends Command {
             }
         }
 
-        // Lấy người dùng được tag, nếu không tag ai thì lấy người gõ lệnh 🎯
+        // 🎯 Lấy người dùng được tag, nếu không tag ai thì lấy chính người gõ lệnh
         const targetUser = message.mentions.users.first() || message.author;
         const userId = targetUser.id;
         const player = data[userId];
@@ -46,7 +46,6 @@ export class ProfileCommand extends Command {
         const spices = inventory.spices || {};
         const coupons = inventory.coupons || 0;
 
-        // Hàm hỗ trợ tạo Embed hiển thị theo tab kho 📦
         const createProfileEmbed = (category: 'meats' | 'veggies' | 'spices') => {
             const embed = new EmbedBuilder()
                 .setColor('#5865F2')
@@ -92,7 +91,6 @@ export class ProfileCommand extends Command {
             return embed;
         };
 
-        // Tạo 3 nút bấm phân loại kho hàng 🔘
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setCustomId('tab_meats')
@@ -113,14 +111,12 @@ export class ProfileCommand extends Command {
             components: [row]
         });
 
-        // Tạo Collector lắng nghe chuyển tab ⏱️
         const collector = response.createMessageComponentCollector({
             componentType: ComponentType.Button,
             time: 60000
         });
 
         collector.on('collect', async (interaction) => {
-            // Ai gõ lệnh thì người đó bấm chuyển tab (kể cả xem profile người khác) 💡
             if (interaction.user.id !== message.author.id) {
                 await interaction.reply({ 
                     content: '❌ Bạn không phải là người gọi menu này!', 

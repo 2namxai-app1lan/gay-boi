@@ -1,3 +1,4 @@
+
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { EmbedBuilder, Message } from 'discord.js';
@@ -26,18 +27,25 @@ export class ProfileCommand extends Command {
 			data = {};
 		}
 
-		const userId = message.author.id;
+		// FIX LỖI MENTION: Lấy người dùng được tag, nếu không tag ai thì lấy người gõ lệnh
+		const targetUser = message.mentions.users.first() || message.author;
+		const userId = targetUser.id;
 
-		// Khởi tạo dữ liệu người chơi mới nếu chưa có
+		// Kiểm tra nếu người dùng target chưa có trong database
 		if (!data[userId]) {
 			data[userId] = {
 				job: 'Unemployed',
 				level: 1,
 				exp: 0,
+				coins: 1000,
 				dishesCooked: 0,
 				tablesServed: 0,
 				guestsWelcomed: 0,
-				inventory: { meat: 5, veggie: 5, spice: 5 },
+				inventory: {
+					meats: { chicken: 5, beef: 2, pork: 3, duck: 0 },
+					veggies: { cabbage: 5, lettuce: 5, water_spinach: 3, garland_chrysanthemum: 0 },
+					spices: { pepper: 5, chili_sauce: 5, ketchup: 5, fish_sauce: 5 }
+				},
 				lastJobChange: 0
 			};
 			fs.writeFileSync(file, JSON.stringify(data, null, 2));
@@ -51,9 +59,15 @@ export class ProfileCommand extends Command {
 
 		if (player.job === 'chef') {
 			jobTitle = '🍳 Chef (Đầu Bếp)';
+			
+			// Đếm tổng nguyên liệu trong kho mở rộng
+			const totalMeat = Object.values(player.inventory?.meats || {}).reduce((a: any, b: any) => a + b, 0);
+			const totalVeggie = Object.values(player.inventory?.veggies || {}).reduce((a: any, b: any) => a + b, 0);
+			const totalSpice = Object.values(player.inventory?.spices || {}).reduce((a: any, b: any) => a + b, 0);
+
 			jobDetailsField = {
 				name: '📦 Thông Tin Đầu Bếp',
-				value: `🥩 **Thịt:** ${player.inventory?.meat || 0}\n🥦 **Rau:** ${player.inventory?.veggie || 0}\n🧂 **Gia vị:** ${player.inventory?.spice || 0}\n🍲 **Món đã nấu:** ${player.dishesCooked || 0}\n\n💡 *Lệnh công việc:* \`mcook\``
+				value: `🥩 **Tổng Thịt:** ${totalMeat}\n🥦 **Tổng Rau:** ${totalVeggie}\n🧂 **Tổng Gia vị:** ${totalSpice}\n🍲 **Món đã nấu:** ${player.dishesCooked || 0}\n\n💡 *Lệnh công việc:* \`mcook\``
 			};
 		} else if (player.job === 'waiter') {
 			jobTitle = '🍵 Waiter (Bồi Bàn)';
@@ -76,8 +90,8 @@ export class ProfileCommand extends Command {
 
 		const embed = new EmbedBuilder()
 			.setColor('#5865F2')
-			.setTitle(`📜 Hồ Sơ Nhân Viên - ${message.author.username}`)
-			.setThumbnail(message.author.displayAvatarURL({ forceStatic: false }))
+			.setTitle(`📜 Hồ Sơ Nhân Viên - ${targetUser.username}`)
+			.setThumbnail(targetUser.displayAvatarURL({ forceStatic: false }))
 			.addFields(
 				{ name: '💼 Vị Trí', value: jobTitle, inline: true },
 				{ name: '⭐ Cấp Độ', value: `Level ${player.level || 1} (${player.exp || 0} EXP)`, inline: true },

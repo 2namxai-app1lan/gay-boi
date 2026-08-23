@@ -137,6 +137,7 @@ export class ProfileCommand extends Command {
         });
 
         collector.on('collect', async (interaction) => {
+            // 🛡️ Chỉ người gõ lệnh mới được phép bấm nút chuyển tab
             if (interaction.user.id !== message.author.id) {
                 await interaction.reply({ 
                     content: '❌ Bạn không phải là người gọi menu này!', 

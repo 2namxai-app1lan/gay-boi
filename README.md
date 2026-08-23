@@ -38,21 +38,9 @@ câu lệnh này dành cho công việc đầu bếp
 • (đang trong giai đoạn phát triển)
 ```
 
-### Development
+```Mserve```
 
-This example can be run with `tsc-watch` to watch the files and automatically restart your bot.
-
-```sh
-npm run watch:start
 ```
-
-### Production
-
-You can also run the bot with `npm dev`, this will first build your code and then run `node ./dist/index.js`. But this is not the recommended way to run a bot in production.
-
-## License
-
-Dedicated to the public domain via the [Unlicense], courtesy of the Sapphire Community and its contributors.
-
-[sapphire]: https://github.com/sapphiredev/framework
-[unlicense]: https://github.com/sapphiredev/examples/blob/main/LICENSE.md
+câu lệnh này dành cho công việc bồi bàn/phục vụ
+• (đang trong giai đoạn phát triển) 
+```

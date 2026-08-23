@@ -14,7 +14,7 @@ import path from 'path';
 @ApplyOptions<Command.Options>({
     name: 'profile',
     aliases: ['mprofile', 'p'],
-    description: 'View your profile and restaurant inventory.'
+    description: 'View your profile or another user profile and restaurant inventory.'
 })
 export class ProfileCommand extends Command {
     public override async messageRun(message: Message) {
@@ -30,11 +30,13 @@ export class ProfileCommand extends Command {
             }
         }
 
-        const userId = message.author.id;
+        // Lấy người dùng được tag, nếu không tag ai thì lấy người gõ lệnh 🎯
+        const targetUser = message.mentions.users.first() || message.author;
+        const userId = targetUser.id;
         const player = data[userId];
 
         if (!player) {
-            await message.reply('❌ Bạn chưa đăng ký làm việc! Hãy gõ lệnh `mjob` để chọn nghề trước nhé.');
+            await message.reply(`❌ **${targetUser.username}** chưa đăng ký làm việc! Hãy gõ lệnh \`mjob\` để chọn nghề trước nhé.`);
             return;
         }
 
@@ -48,8 +50,8 @@ export class ProfileCommand extends Command {
         const createProfileEmbed = (category: 'meats' | 'veggies' | 'spices') => {
             const embed = new EmbedBuilder()
                 .setColor('#5865F2')
-                .setTitle(`👤 Hồ Sơ Nhân Viên - ${message.author.username}`)
-                .setThumbnail(message.author.displayAvatarURL())
+                .setTitle(`👤 Hồ Sơ Nhân Viên - ${targetUser.username}`)
+                .setThumbnail(targetUser.displayAvatarURL())
                 .addFields(
                     { name: '💼 Chức vụ', value: `\`${(player.job || 'Unemployed').toUpperCase()}\``, inline: true },
                     { name: '⭐ Cấp độ (Level)', value: `\`LV.${player.level || 1}\` (${player.exp || 0} EXP)`, inline: true },
@@ -118,9 +120,10 @@ export class ProfileCommand extends Command {
         });
 
         collector.on('collect', async (interaction) => {
+            // Ai gõ lệnh thì người đó bấm chuyển tab (kể cả xem profile người khác) 💡
             if (interaction.user.id !== message.author.id) {
                 await interaction.reply({ 
-                    content: '❌ Bạn không phải là chủ sở hữu hồ sơ này!', 
+                    content: '❌ Bạn không phải là người gọi menu này!', 
                     ephemeral: true 
                 });
                 return;
@@ -137,7 +140,6 @@ export class ProfileCommand extends Command {
         });
 
         collector.on('end', async () => {
-            // Khi hết 60 giây thì vô hiệu hóa các nút bấm 🛑
             const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
                 row.components.map((button) => ButtonBuilder.from(button).setDisabled(true))
             );

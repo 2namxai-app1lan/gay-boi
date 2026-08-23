@@ -44,3 +44,10 @@ câu lệnh này dành cho công việc đầu bếp
 câu lệnh này dành cho công việc bồi bàn/phục vụ
 • (đang trong giai đoạn phát triển) 
 ```
+
+```Mrecipe```
+
+```
+câu lệnh này dành cho đầu bếp (mở cook book/sách nấu ăn) 
+• (đang trong giai đoạn phát triển) 
+```

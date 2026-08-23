@@ -8,7 +8,9 @@
 
 ```Mjob```
 
-`sẽ cho bạn đi làm trong nhà hàng như ngoài đời thiệt 💥`
+```
+sẽ cho bạn đi làm trong nhà hàng như ngoài đời thiệt 💥
+```
 
 ```
 có 3 công việc khác nhau

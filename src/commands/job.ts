@@ -83,7 +83,17 @@ export class JobCommand extends Command {
 
             const playerData = currentData[userId] || {};
 
-            if (playerData.job && playerData.job !== 'Unemployed') {
+            // 🗺️ Ánh xạ ID nút bấm thành tên Job chuẩn hóa (Viết hoa chữ cái đầu)
+            const jobMap: Record<string, string> = {
+                'waiter': 'Waiter',
+                'chef': 'Chef',
+                'receptionist': 'Receptionist'
+            };
+
+            const selectedJob = jobMap[interaction.customId] || 'Unemployed';
+
+            // Kiểm tra xem người chơi đã có job hợp lệ chưa
+            if (playerData.job && playerData.job.toLowerCase() !== 'unemployed') {
                 await interaction.reply({
                     content: `⏳ **Bạn đang trong hợp đồng làm việc!** Chức vụ hiện tại: **${playerData.job.toUpperCase()}**.`,
                     ephemeral: true
@@ -91,7 +101,6 @@ export class JobCommand extends Command {
                 return;
             }
 
-            const selectedJob = interaction.customId;
             const inventory = playerData.inventory || {
                 meats: { chicken: 5, beef: 2, pork: 3, duck: 0 },
                 veggies: { cabbage: 5, lettuce: 5, water_spinach: 3, garland_chrysanthemum: 0 },
@@ -99,16 +108,18 @@ export class JobCommand extends Command {
                 coupons: 0
             };
 
-            // 🎁 Tặng 1 Coupon tân thủ cho mọi công việc được chọn
+            // 🎁 Tặng 1 Coupon tân thủ cho lần nhận việc thành công
             inventory.coupons = (inventory.coupons || 0) + 1;
             const extraMessage = '\n🎟️ **Tân thủ quà tặng:** Bạn đã nhận được **1 Coupon mua hàng FREE**!';
 
+            // 💾 Lưu thông tin đã chuẩn hóa vào JSON
             currentData[userId] = {
                 ...playerData,
                 job: selectedJob,
                 lastJobChange: Date.now(),
                 inventory: inventory
             };
+
             fs.writeFileSync(file, JSON.stringify(currentData, null, 2));
 
             const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -116,9 +127,16 @@ export class JobCommand extends Command {
             );
 
             await interaction.update({
-                content: `🎉 **Chúc mừng!** Bạn đã nhận vị trí **${selectedJob.toUpperCase()}** tại nhà hàng "Hết Khô Gà"!${extraMessage}`,
+                content: `🎉 **Chúc mừng!** Bạn đã nhận vị trí **${selectedJob}** tại nhà hàng "Hết Khô Gà"!${extraMessage}`,
                 components: [disabledRow]
             });
+        });
+
+        collector.on('end', async () => {
+            const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                row.components.map((button: ButtonBuilder) => ButtonBuilder.from(button).setDisabled(true))
+            );
+            await response.edit({ components: [disabledRow] }).catch(() => {});
         });
     }
 }

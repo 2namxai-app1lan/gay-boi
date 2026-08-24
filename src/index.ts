@@ -7,8 +7,8 @@ const client = new SapphireClient({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent
     ],
-    defaultPrefix: 'M', 
-    caseInsensitivePrefixes: true,
+    defaultPrefix: 'M', // 👈 Đặt tiền tố mặc định là chữ 'M'
+    caseInsensitivePrefixes: true, // 👈 Cho phép nhận diện cả 'm' viết thường
     presence: {
         activities: [
             {
@@ -19,4 +19,6 @@ const client = new SapphireClient({
         status: 'online'
     }
 });
+
 client.login(process.env.DISCORD_TOKEN);
+

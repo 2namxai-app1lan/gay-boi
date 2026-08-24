@@ -18,5 +18,4 @@ const client = new SapphireClient({
     }
 });
 
-client.login('MTUxMjEwMDE2MDg4MzM5MjU4Mw.G2JSiz.8OmxqnKkTRrSqPkx4B54i9XuEaHhab7n7rzAbc
-');
+client.login('MTUxMjEwMDE2MDg4MzM5MjU4Mw.G2JSiz.8OmxqnKkTRrSqPkx4B54i9XuEaHhab7n7rzAbc');

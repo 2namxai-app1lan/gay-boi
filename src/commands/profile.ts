@@ -13,7 +13,7 @@ import path from 'path';
 
 @ApplyOptions<Command.Options>({
     name: 'profile',
-    aliases: ['mprofile', 'p'],
+    aliases: ['p'],
     description: 'View your profile or another user profile and restaurant inventory.'
 })
 export class ProfileCommand extends Command {

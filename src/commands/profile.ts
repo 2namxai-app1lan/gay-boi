@@ -20,6 +20,7 @@ export class ProfileCommand extends Command {
     public override async messageRun(message: Message) {
         const file = path.join(process.cwd(), 'src', 'data', 'players.json');
 
+        // 📖 Đọc dữ liệu mới nhất từ file JSON
         let data: Record<string, any> = {};
         if (fs.existsSync(file)) {
             try {
@@ -30,11 +31,11 @@ export class ProfileCommand extends Command {
             }
         }
 
-        // 🎯 Lấy người dùng được tag, nếu không tag ai thì lấy người gõ lệnh
+        // 🎯 Lấy đúng người dùng được tag hoặc người gõ lệnh
         const targetUser = message.mentions.users.first() || message.author;
-        const userId = targetUser.id;
+        const userId = String(targetUser.id); // Đảm bảo ID luôn ở dạng String
 
-        // 🔄 Nếu người được tag chưa có trong file, tự động khởi tạo hồ sơ mặc định (Thất nghiệp)
+        // 🔄 Khởi tạo hồ sơ mặc định nếu người dùng CHƯA CÓ trong file
         if (!data[userId]) {
             data[userId] = {
                 job: 'Unemployed',
@@ -56,10 +57,13 @@ export class ProfileCommand extends Command {
         }
 
         const player = data[userId];
-        const jobName = (player.job || 'Unemployed').toLowerCase();
+        
+        // 🔤 Chuẩn hóa tên công việc về chữ viết thường để so sánh
+        const rawJob = player.job || 'Unemployed';
+        const jobName = rawJob.toLowerCase();
         const isUnemployed = jobName === 'unemployed';
 
-        // 🛑 TRƯỜNG HỢP THẤT NGHIỆP: Chỉ hiển thị thông báo ngắn gọn
+        // 🛑 TRƯỜNG HỢP THẤT NGHIỆP
         if (isUnemployed) {
             const unemployedEmbed = new EmbedBuilder()
                 .setColor('#ED4245')
@@ -74,20 +78,19 @@ export class ProfileCommand extends Command {
         const inventory = player.inventory || {};
         const coupons = inventory.coupons || 0;
 
-        // 🛠️ HÀM TẠO EMBED DỰA TRÊN TỪNG NGHỀ VÀ SUB-TAB
+        // 🛠️ HÀM TẠO EMBED DỰA TRÊN CÔNG VIỆC
         const createJobProfileEmbed = (subTab: string) => {
             const embed = new EmbedBuilder()
                 .setColor('#5865F2')
                 .setTitle(`👤 Hồ Sơ Nhân Viên - ${targetUser.username}`)
                 .setThumbnail(targetUser.displayAvatarURL())
                 .addFields(
-                    { name: '💼 Chức vụ', value: `\`${player.job.toUpperCase()}\``, inline: true },
+                    { name: '💼 Chức vụ', value: `\`${rawJob.toUpperCase()}\``, inline: true },
                     { name: '⭐ Cấp độ (Level)', value: `\`LV.${player.level || 1}\` (${player.exp || 0} EXP)`, inline: true },
                     { name: '💰 Ví tiền', value: `\`${player.coins || 0}\` Coins`, inline: true },
                     { name: '🎟️ Coupon Free', value: `\`${coupons}\` thẻ`, inline: true }
                 );
 
-            // Phân loại nội dung hiển thị theo nghề nghiệp
             if (jobName === 'chef') {
                 const meats = inventory.meats || {};
                 const veggies = inventory.veggies || {};
@@ -96,13 +99,13 @@ export class ProfileCommand extends Command {
                 if (subTab === 'chef_meats') {
                     embed.addFields({
                         name: '🥩 Kho Thịt (Meats)',
-                        value: `🐔 **Gà (Chicken):** \`${meats.chicken || 0}\`\n🥩 **Bò (Beef):** \`${meats.beef || 0}\`\n🐖 **Heo (Pork):** \`${meats.pork || 0}\`\n🦆 **Vịt (Duck):** \`${meats.duck || 0}\``,
+                        value: `🐔 **Gà:** \`${meats.chicken || 0}\`\n🥩 **Bò:** \`${meats.beef || 0}\`\n🐖 **Heo:** \`${meats.pork || 0}\`\n🦆 **Vịt:** \`${meats.duck || 0}\``,
                         inline: false
                     });
                 } else if (subTab === 'chef_veggies') {
                     embed.addFields({
                         name: '🥦 Kho Rau (Veggies)',
-                        value: `🥬 **Bắp cải (Cabbage):** \`${veggies.cabbage || 0}\`\n🥗 **Xà lách (Lettuce):** \`${veggies.lettuce || 0}\`\n🌱 **Rau muống:** \`${veggies.water_spinach || 0}\`\n🌿 **Tần ô:** \`${veggies.garland_chrysanthemum || 0}\``,
+                        value: `🥬 **Bắp cải:** \`${veggies.cabbage || 0}\`\n🥗 **Xà lách:** \`${veggies.lettuce || 0}\`\n🌱 **Rau muống:** \`${veggies.water_spinach || 0}\`\n🌿 **Tần ô:** \`${veggies.garland_chrysanthemum || 0}\``,
                         inline: false
                     });
                 } else {
@@ -114,7 +117,7 @@ export class ProfileCommand extends Command {
                 }
             } else if (jobName === 'waiter') {
                 if (subTab === 'waiter_tables') {
-                    embed.addFields({ name: '🪑 Bàn Đang Phục Vụ', value: 'Trạng thái: Đang chuẩn bị phục vụ khách.\n• Bàn 1: Trống\n• Bàn 2: Đang dùng bữa', inline: false });
+                    embed.addFields({ name: '🪑 Bàn Đang Phục Vụ', value: 'Trạng thái: Đang phục vụ.\n• Bàn 1: Trống\n• Bàn 2: Đang dùng bữa', inline: false });
                 } else if (subTab === 'waiter_orders') {
                     embed.addFields({ name: '🍲 Món Chờ Mang Ra', value: '• Đang có `0` món ăn chờ phục vụ khách.', inline: false });
                 } else {
@@ -134,7 +137,7 @@ export class ProfileCommand extends Command {
             return embed;
         };
 
-        // 🔘 TẠO 3 NÚT BẤM ĐỘC LẬP TÙY THEO NGHỀ
+        // 🔘 TẠO NÚT BẤM
         let row = new ActionRowBuilder<ButtonBuilder>();
 
         if (jobName === 'chef') {
@@ -164,17 +167,17 @@ export class ProfileCommand extends Command {
             components: [row]
         });
 
-        // ⏱️ COLLECTOR LẮNG NGHE TƯƠNG TÁC NÚT
+        // ⏱️ LẮNG NGHE TƯƠNG TÁC NÚT
         const collector = response.createMessageComponentCollector({
             componentType: ComponentType.Button,
             time: 60000
         });
 
         collector.on('collect', async (interaction) => {
-            // 🛡️ CHỈ CHÍNH CHỦ mới được quyền bấm nút chuyển tab
-            if (interaction.user.id !== targetUser.id) {
+            // Cho phép người gõ lệnh chuyển tab xem thông tin của targetUser
+            if (interaction.user.id !== message.author.id) {
                 await interaction.reply({ 
-                    content: '❌ Đây không phải là bảng hồ sơ của bạn!', 
+                    content: '❌ Bạn không phải là người dùng lệnh này!', 
                     ephemeral: true 
                 });
                 return;

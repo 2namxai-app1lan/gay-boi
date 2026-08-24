@@ -17,4 +17,5 @@ const client = new SapphireClient({
     }
 });
 
-client.login('YOUR_BOT_TOKEN');
+client.login('MTUxMjEwMDE2MDg4MzM5MjU4Mw.G2JSiz.8OmxqnKkTRrSqPkx4B54i9XuEaHhab7n7rzAbc
+');

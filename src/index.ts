@@ -7,6 +7,8 @@ const client = new SapphireClient({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent
     ],
+    defaultPrefix: 'M', 
+    caseInsensitivePrefixes: true,
     presence: {
         activities: [
             {
@@ -17,5 +19,4 @@ const client = new SapphireClient({
         status: 'online'
     }
 });
-
-client.login('MTUxMjEwMDE2MDg4MzM5MjU4Mw.G2JSiz.8OmxqnKkTRrSqPkx4B54i9XuEaHhab7n7rzAbc');
+client.login(process.env.DISCORD_TOKEN);

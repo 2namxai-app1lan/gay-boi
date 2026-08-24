@@ -7,12 +7,13 @@ const client = new SapphireClient({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent
     ],
-    // 🎮 Thử set trực tiếp presence tại đây:
     presence: {
-        activities: [{
-            name: 'Thiếu bã mía là mất khô gà 🐔',
-            type: ActivityType.Playing
-        }],
+        activities: [
+            {
+                name: 'Thiếu bã mía là mất khô gà 🐔',
+                type: ActivityType.Playing
+            }
+        ],
         status: 'online'
     }
 });

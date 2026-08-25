@@ -10,6 +10,7 @@ const client = new SapphireClient({
     ],
     defaultPrefix: 'M',
     caseInsensitivePrefixes: true,
+    loadMessageCommandListeners: true,
     presence: {
         activities: [
             {

@@ -21,7 +21,7 @@ export class ReadyListener extends Listener {
             { name: '"Im gay" - Tiến gay ', type: ActivityType.Playing },
             { name: 'đang nghe giao hưởng thank độ, vui lòng không làm phiền ', type: ActivityType.Listening },
             { name: 'mhelp để biết các câu lệnh 📜', type: ActivityType.Playing },
-            { name: '"Tao tán mày 1 phát sang Campuchia đấy" - Tôm không gay ', type: ActivityType.Playing }
+            { name: '"Tao táng mày 1 phát sang Campuchia đấy" - Tôm không gay ', type: ActivityType.Playing }
         ];
 
         let currentIndex = 0;

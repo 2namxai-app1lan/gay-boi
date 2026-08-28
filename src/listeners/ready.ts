@@ -14,7 +14,6 @@ export class ReadyListener extends Listener {
         const client = this.container.client;
         if (!client.user) return;
 
-        // 📝 Danh sách các câu trạng thái độc lạ
         const statusList = [
             { name: 'Thiếu bã mía là mất khô gà ', type: ActivityType.Playing },
             { name: ':3c', type: ActivityType.Playing },
@@ -27,7 +26,6 @@ export class ReadyListener extends Listener {
 
         let currentIndex = 0;
 
-        // 🔄 Hàm cập nhật trạng thái
         const updateStatus = () => {
             const currentStatus = statusList[currentIndex];
             client.user?.setActivity(currentStatus.name, { type: currentStatus.type });
@@ -39,7 +37,7 @@ export class ReadyListener extends Listener {
         // Kích hoạt ngay lập tức khi bot online
         updateStatus();
 
-        // ⏱️ Cứ mỗi 30 giây (30000 ms) sẽ tự động đổi câu một lần
+        // ⏱️ Cứ mỗi 20 giây (20000 ms) sẽ tự động đổi câu một lần
         setInterval(updateStatus, 30000);
 
         this.container.logger.info(`🤖 Bot ${client.user.tag} đã sẵn sàng hoạt động với trạng thái xoay vần!`);

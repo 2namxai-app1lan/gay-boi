@@ -23,9 +23,3 @@ config.ts
 # Ignore npm lockfiles file
 package-lock.json
 
-# Environment variables
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env
